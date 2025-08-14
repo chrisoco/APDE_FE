@@ -36,7 +36,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   });
 
   if (res.ok) {
-    return redirect("/");
+    return redirect("/admin");
   }
 
   let message = "Login failed";
