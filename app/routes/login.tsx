@@ -1,4 +1,3 @@
-// app/routes/login.tsx
 import { Form, redirect, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/login";
 import { getXsrfTokenFromCookie } from "../lib/csrf";
@@ -11,19 +10,15 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   const email = String(fd.get("email") || "");
   const password = String(fd.get("password") || "");
 
-  // 1) Get CSRF cookie
-  await fetch(`${API}/sanctum/csrf-cookie`, {
+  const csrfResponse = await fetch(`${API}/sanctum/csrf-cookie`, {
     method: "GET",
     credentials: "include",
   });
-
-  // 2) Read CSRF token from cookie -> header
   const xsrf = getXsrfTokenFromCookie();
   if (!xsrf) {
     return { error: "No CSRF token set. Check CORS/cookie settings." };
   }
 
-  // 3) Attempt login (session cookie is set on success)
   const res = await fetch(`${API}/login`, {
     method: "POST",
     credentials: "include",
