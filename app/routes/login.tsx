@@ -1,45 +1,30 @@
 import { Form, redirect, useActionData, useNavigation } from "react-router";
 import type { Route } from "./+types/login";
-import { getXsrfTokenFromCookie } from "../lib/csrf";
+import { api, apiHelpers } from "../lib/api";
 import { useState } from "react";
-
-const API = import.meta.env.VITE_API_URL;
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
   const fd = await request.formData();
   const email = String(fd.get("email") || "");
   const password = String(fd.get("password") || "");
 
-  const csrfResponse = await fetch(`${API}/sanctum/csrf-cookie`, {
-    method: "GET",
-    credentials: "include",
-  });
-  const xsrf = getXsrfTokenFromCookie();
-  if (!xsrf) {
-    return { error: "No CSRF token set. Check CORS/cookie settings." };
-  }
-
-  const res = await fetch(`${API}/login`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      "X-XSRF-TOKEN": xsrf,
-    },
-    body: JSON.stringify({ email, password }),
-  });
-
-  if (res.ok) {
-    return redirect("/admin");
-  }
-
-  let message = "Login failed";
   try {
-    const data = await res.json();
-    if (data?.message) message = data.message;
-  } catch {}
-  return { error: message };
+    await api("/sanctum/csrf-cookie", { method: "GET" });
+    
+    await apiHelpers.post("/login", { email, password }, { includeCSRF: true });
+    
+    return redirect("/admin");
+  } catch (error) {
+    let message = "Login failed";
+    if (error instanceof Error && error.message.includes("API Error:")) {
+      try {
+        const errorMessage = error.message.split("API Error: ")[1];
+        const data = JSON.parse(errorMessage.split(" ").slice(1).join(" "));
+        if (data?.message) message = data.message;
+      } catch {}
+    }
+    return { error: message };
+  }
 }
 
 export default function Login() {

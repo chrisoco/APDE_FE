@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import type { Route } from "../+types/admin";
+import { apiHelpers } from "../../lib/api";
 
 interface Campaign {
   id: string;
@@ -36,8 +37,6 @@ interface CampaignResponse {
   };
 }
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
-
 export default function Campaign(_: Route.ComponentProps) {
   const [campaigns, setCampaigns] = useState<CampaignResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,26 +50,11 @@ export default function Campaign(_: Route.ComponentProps) {
   const fetchCampaigns = async (page: number) => {
     try {
       setLoading(true);
-      
-      const headers: Record<string, string> = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      };
-      
-      const response = await fetch(`${API}/api/campaigns?per_page=10&page=${page}`, {
-        credentials: 'include',
-        headers,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.log('Error response body:', errorText);
-        if (response.status === 401) {
-          throw new Error('Please login first');
-        }
-        throw new Error(`Failed to fetch campaigns: ${response.status}`);
-      }
-      const data = await response.json();
+      const data = await apiHelpers.paginated<CampaignResponse>(
+        "/api/campaigns",
+        { page, per_page: 7 },
+        { requiresAuth: true }
+      );
       setCampaigns(data);
       setError(null);
     } catch (err) {

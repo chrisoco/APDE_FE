@@ -1,16 +1,25 @@
-import { Outlet, NavLink, redirect } from "react-router";
+import { Outlet, NavLink, redirect, useLoaderData } from "react-router";
 import type { Route } from "./+types/admin";
+import { apiHelpers } from "../lib/api";
 
-const API = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+export async function clientLoader() {
+  try {
+    const user = await apiHelpers.get("/api/user");
+    return { user };
+  } catch (error) {
+    throw redirect("/login");
+  }
+}
 
 export default function AdminLayout() {
+  const { user } = useLoaderData<typeof clientLoader>();
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", minHeight: "100vh" }}>
       <aside style={{ borderRight: "1px solid #e5e7eb", padding: "1rem" }}>
         <div style={{ fontWeight: 700, marginBottom: "1rem" }}>My CMS</div>
         <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 12 }}>
-          Signed in as <br /> <strong>John Doe</strong>
+          Signed in as <br /> <strong>{user?.name || user?.email || "User"}</strong>
         </div>
         <nav style={{ display: "grid", gap: "8px" }}>
           <NavItem to="/admin" end label="Dashboard" />
