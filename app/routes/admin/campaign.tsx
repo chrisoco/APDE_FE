@@ -1,41 +1,7 @@
 import { useState, useEffect } from "react";
 import type { Route } from "../+types/admin";
 import { apiHelpers } from "../../lib/api";
-
-interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  status: string;
-  prospect_filter: {
-    max_age?: number;
-    gender?: string;
-    source?: string;
-  };
-  landingpage: {
-    id: string;
-    title: string;
-    slug: string;
-  };
-}
-
-interface CampaignResponse {
-  data: Campaign[];
-  meta: {
-    current_page: number;
-    last_page: number;
-    per_page: number;
-    total: number;
-  };
-  links: {
-    first?: string;
-    last?: string;
-    prev?: string;
-    next?: string;
-  };
-}
+import type { CampaignResponse } from "../../lib/types";
 
 export default function Campaign(_: Route.ComponentProps) {
   const [campaigns, setCampaigns] = useState<CampaignResponse | null>(null);
