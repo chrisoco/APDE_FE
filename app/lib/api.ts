@@ -91,7 +91,7 @@ export const apiHelpers = {
   paginated: <T = any>(
     endpoint: string, 
     pagination: PaginationOptions = {}, 
-    options?: Omit<ApiOptions, 'method' | 'params'>
+    options?: Omit<ApiOptions, 'method'>
   ) => {
     const { page = 1, per_page = 10 } = pagination;
     return apiJson<T>(endpoint, {

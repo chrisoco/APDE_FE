@@ -15,6 +15,9 @@ import {
 
 import { ArrowLeft, Loader2 } from "lucide-react"
 import { apiHelpers } from "~/lib/api"
+import { ProspectFilter } from "~/components/prospect-filter"
+import type { ProspectFilter as ProspectFilterType } from "~/services/prospects"
+import { transformProspectFilterForAPI, transformProspectFilterFromAPI } from "~/utils/prospect-filter"
 
 type Campaign = {
   id?: string
@@ -23,6 +26,7 @@ type Campaign = {
   start_date: string
   end_date: string
   status: 'draft' | 'active' | 'paused' | 'completed'
+  prospect_filter?: ProspectFilterType
 }
 
 type ValidationErrors = {
@@ -39,7 +43,8 @@ export default function CampaignForm() {
     description: '',
     start_date: '',
     end_date: '',
-    status: 'draft'
+    status: 'draft',
+    prospect_filter: {}
   })
   const [loading, setLoading] = useState(false)
   const [fetchingData, setFetchingData] = useState(isEditing)
@@ -62,7 +67,8 @@ export default function CampaignForm() {
         description: campaign.description,
         start_date: campaign.start_date ? campaign.start_date.split('T')[0] : '',
         end_date: campaign.end_date ? campaign.end_date.split('T')[0] : '',
-        status: campaign.status.toLowerCase()
+        status: campaign.status.toLowerCase(),
+        prospect_filter: campaign.prospect_filter ? transformProspectFilterFromAPI(campaign.prospect_filter) : {}
       })
     } catch (error) {
       console.error('Failed to fetch campaign:', error)
@@ -82,6 +88,9 @@ export default function CampaignForm() {
         ...formData,
         start_date: formData.start_date ? `${formData.start_date}T00:00:00.000Z` : null,
         end_date: formData.end_date ? `${formData.end_date}T23:59:59.000Z` : null,
+        prospect_filter: formData.prospect_filter && Object.keys(formData.prospect_filter).length > 0 
+          ? transformProspectFilterForAPI(formData.prospect_filter)
+          : undefined
       }
 
       if (isEditing && id) {
@@ -226,6 +235,13 @@ export default function CampaignForm() {
               {getFieldError('status') && (
                 <p className="text-sm text-red-600">{getFieldError('status')}</p>
               )}
+            </div>
+
+            <div className="space-y-2">
+              <ProspectFilter
+                value={formData.prospect_filter}
+                onValueChange={(filter) => setFormData({ ...formData, prospect_filter: filter })}
+              />
             </div>
             
             <div className="flex gap-2 pt-4">
