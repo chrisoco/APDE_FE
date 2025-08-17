@@ -90,8 +90,9 @@ export const landingpageColumns: ColumnDef<Landingpage>[] = [
       )
     },
     cell: ({ row }) => {
-      const title = row.original.campaign.title
-      return <div className="font-medium">{truncateText(title, 30)}</div>
+      const campaign = row.original.campaign
+      const title = campaign?.title || "No Campaign"
+      return <div className="font-medium text-muted-foreground">{truncateText(title, 30)}</div>
     },
   },
   {
@@ -108,13 +109,15 @@ export const landingpageColumns: ColumnDef<Landingpage>[] = [
       )
     },
     cell: ({ row }) => {
-      const status = row.original.campaign.status
+      const campaign = row.original.campaign
+      const status = campaign?.status || "No Campaign"
       return (
         <div className="flex w-[100px]">
           <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-            status === 'Active' 
+            campaign ? (status === 'Active' 
               ? 'bg-green-50 text-green-700 ring-green-600/20' 
-              : 'bg-gray-50 text-gray-600 ring-gray-500/10'
+              : 'bg-gray-50 text-gray-600 ring-gray-500/10') 
+              : 'bg-gray-50 text-gray-500 ring-gray-400/20'
           }`}>
             {status}
           </span>

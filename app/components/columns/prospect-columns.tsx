@@ -15,7 +15,10 @@ import {
 import type { Prospect } from "../../lib/types"
 
 const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    if (!dateString) {
+        return "";
+    }
+    return new Date(dateString).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
 export const prospectColumns: ColumnDef<Prospect>[] = [

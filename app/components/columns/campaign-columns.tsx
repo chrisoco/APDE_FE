@@ -18,8 +18,11 @@ const truncateDescription = (desc: string, maxLength: number = 100) => {
   return desc.length > maxLength ? `${desc.substring(0, maxLength)}...` : desc;
 };
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString();
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) {
+    return "";
+  }
+  return new Date(dateString).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
 export const campaignColumns: ColumnDef<Campaign>[] = [
@@ -173,9 +176,13 @@ export const campaignColumns: ColumnDef<Campaign>[] = [
               Copy campaign ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View campaign</DropdownMenuItem>
-            <DropdownMenuItem>Edit campaign</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
+            <DropdownMenuItem onClick={() => (window as any).handleCampaignEdit?.(campaign.id)}>
+              Edit campaign
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-red-600"
+              onClick={() => (window as any).handleCampaignDelete?.(campaign)}
+            >
               Delete campaign
             </DropdownMenuItem>
           </DropdownMenuContent>

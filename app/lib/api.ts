@@ -29,8 +29,9 @@ export async function api(endpoint: string, options: ApiOptions = {}): Promise<R
 
   if (includeCSRF) {
     const xsrfToken = getXsrfTokenFromCookie();
+
     if (xsrfToken) {
-      headers["X-XSRF-TOKEN"] = xsrfToken;
+        (headers as any)["X-XSRF-TOKEN"] = xsrfToken;
     }
   }
 
