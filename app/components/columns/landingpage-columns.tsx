@@ -155,9 +155,13 @@ export const landingpageColumns: ColumnDef<Landingpage>[] = [
               Copy landing page ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View landing page</DropdownMenuItem>
-            <DropdownMenuItem>Edit landing page</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
+            <DropdownMenuItem onClick={() => (window as any).handleLandingpageEdit?.(landingpage.id)}>
+              Edit landing page
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              className="text-red-600"
+              onClick={() => (window as any).handleLandingpageDelete?.(landingpage)}
+            >
               Delete landing page
             </DropdownMenuItem>
           </DropdownMenuContent>

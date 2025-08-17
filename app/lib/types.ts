@@ -86,7 +86,7 @@ export interface Landingpage {
       gender?: string;
       source?: string;
     };
-  };
+  } | null;
   title: string;
   slug: string;
   headline: string;

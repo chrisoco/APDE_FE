@@ -11,5 +11,7 @@ export default [
     route("campaign/create", "routes/admin/campaign-form.tsx", { id: "campaign-create" }),
     route("campaign/:id/edit", "routes/admin/campaign-form.tsx", { id: "campaign-edit" }),
     route("landingpage", "routes/admin/landingpage.tsx"),
+    route("landingpage/create", "routes/admin/landingpage-form.tsx", { id: "landingpage-create" }),
+    route("landingpage/:id/edit", "routes/admin/landingpage-form.tsx", { id: "landingpage-edit" }),
   ]),
 ] satisfies RouteConfig;

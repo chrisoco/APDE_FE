@@ -138,7 +138,7 @@ export default function CampaignForm() {
         </h1>
       </div>
 
-      <div className="max-w-2xl">
+      <div className="max-w-2xl mx-auto">
         <div className="mb-6">
           <h2 className="text-xl font-semibold">Campaign Details</h2>
           <p className="text-sm text-muted-foreground mt-1">
@@ -213,7 +213,7 @@ export default function CampaignForm() {
                   setFormData({ ...formData, status: value })
                 }
               >
-                <SelectTrigger className={getFieldError('status') ? 'border-red-500' : ''}>
+                <SelectTrigger className={`w-full ${getFieldError('status') ? 'border-red-500' : ''}`}>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
