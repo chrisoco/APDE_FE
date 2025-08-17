@@ -1,6 +1,13 @@
-import { Outlet, NavLink, redirect, useLoaderData, Form } from "react-router";
+import * as React from "react";
+import { Outlet, redirect, useLoaderData } from "react-router";
 import type { Route } from "./+types/_layout";
 import { apiHelpers } from "../../lib/api";
+import { AppSidebar } from "../../components/app-sidebar";
+import { SiteHeader } from "../../components/site-header";
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "../../components/ui/sidebar";
 
 export async function clientLoader() {
   try {
@@ -35,48 +42,28 @@ export default function AdminLayout() {
   const { user } = useLoaderData<typeof clientLoader>();
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", minHeight: "100vh" }}>
-      <aside style={{ borderRight: "1px solid #e5e7eb", padding: "1rem" }}>
-        <div style={{ fontWeight: 700, marginBottom: "1rem" }}>APDE FE</div>
-        <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 12 }}>
-          Signed in as <br /> <strong>{user?.name || user?.email || "User"}</strong>
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <main className="px-4 lg:px-6">
+                <Outlet />
+              </main>
+            </div>
+          </div>
         </div>
-        <nav style={{ display: "grid", gap: "8px" }}>
-          <NavItem to="/admin" end label="Dashboard" />
-          <NavItem to="/admin/prospects" label="Prospects" />
-          <NavItem to="/admin/campaign" label="Campaign" />
-          <NavItem to="/admin/landingpage" label="Landingpage" />
-        </nav>
-        <Form method="post" style={{ marginTop: "auto" }}>
-          <input type="hidden" name="intent" value="logout" />
-          <button type="submit" style={{ marginTop: 16, padding: "8px 10px", border: "1px solid #d1d5db", borderRadius: 8 }}>
-            Log out
-          </button>
-        </Form>
-      </aside>
-      <main style={{ padding: "1.25rem 1.5rem" }}>
-        <Outlet />
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
-function NavItem({ to, label, end = false }: { to: string; label: string; end?: boolean }) {
-  return (
-    <NavLink
-      to={to}
-      end={end}
-      style={({ isActive }) => ({
-        padding: "8px 10px",
-        borderRadius: 8,
-        textDecoration: "none",
-        color: isActive ? "#111827" : "#374151",
-        background: isActive ? "#eef2ff" : "transparent",
-        border: isActive ? "1px solid #c7d2fe" : "1px solid transparent",
-        fontWeight: isActive ? 600 : 500,
-      })}
-    >
-      {label}
-    </NavLink>
-  );
-}
