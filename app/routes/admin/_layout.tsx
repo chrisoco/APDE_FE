@@ -37,7 +37,7 @@ export default function AdminLayout() {
   return (
     <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", minHeight: "100vh" }}>
       <aside style={{ borderRight: "1px solid #e5e7eb", padding: "1rem" }}>
-        <div style={{ fontWeight: 700, marginBottom: "1rem" }}>My CMS</div>
+        <div style={{ fontWeight: 700, marginBottom: "1rem" }}>APDE FE</div>
         <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 12 }}>
           Signed in as <br /> <strong>{user?.name || user?.email || "User"}</strong>
         </div>
