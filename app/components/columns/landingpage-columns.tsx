@@ -18,7 +18,10 @@ const truncateText = (text: string, maxLength: number = 50) => {
   return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;
 };
 
-export const landingpageColumns: ColumnDef<Landingpage>[] = [
+export const landingpageColumns = (
+  onEdit: (id: string) => void,
+  onDelete: (landingpage: Landingpage) => void
+): ColumnDef<Landingpage>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -111,12 +114,12 @@ export const landingpageColumns: ColumnDef<Landingpage>[] = [
               Copy landing page ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => (window as any).handleLandingpageEdit?.(landingpage.id)}>
+            <DropdownMenuItem onClick={() => onEdit(landingpage.id)}>
               Edit landing page
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="text-red-600"
-              onClick={() => (window as any).handleLandingpageDelete?.(landingpage)}
+              onClick={() => onDelete(landingpage)}
             >
               Delete landing page
             </DropdownMenuItem>

@@ -1,17 +1,9 @@
 "use client"
 
 import { type ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu"
 import type { Prospect } from "../../lib/types"
 
 const formatDate = (dateString: string) => {
@@ -142,46 +134,6 @@ export const prospectColumns: ColumnDef<Prospect>[] = [
         <div className="text-muted-foreground">
           {Math.round(prospect.height)}cm / {Math.round(prospect.weight)}kg
         </div>
-      )
-    },
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const prospect = row.original
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-              zIndex: 1000
-            }}
-          >
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(prospect.id.toString())}
-            >
-              Copy prospect ID
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>View prospect</DropdownMenuItem>
-            <DropdownMenuItem>Edit prospect</DropdownMenuItem>
-            <DropdownMenuItem className="text-red-600">
-              Delete prospect
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       )
     },
   },

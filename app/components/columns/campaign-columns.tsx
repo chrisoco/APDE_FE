@@ -25,7 +25,10 @@ const formatDate = (dateString: string | null | undefined) => {
   return new Date(dateString).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' });
 };
 
-export const campaignColumns: ColumnDef<Campaign>[] = [
+export const campaignColumns = (
+  onEdit: (id: string) => void,
+  onDelete: (campaign: Campaign) => void
+): ColumnDef<Campaign>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -195,12 +198,12 @@ export const campaignColumns: ColumnDef<Campaign>[] = [
               Copy campaign ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => (window as any).handleCampaignEdit?.(campaign.id)}>
+            <DropdownMenuItem onClick={() => onEdit(campaign.id)}>
               Edit campaign
             </DropdownMenuItem>
             <DropdownMenuItem 
               className="text-red-600"
-              onClick={() => (window as any).handleCampaignDelete?.(campaign)}
+              onClick={() => onDelete(campaign)}
             >
               Delete campaign
             </DropdownMenuItem>
