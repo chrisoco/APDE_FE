@@ -60,67 +60,23 @@ export const landingpageColumns: ColumnDef<Landingpage>[] = [
     },
   },
   {
-    accessorKey: "slug",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Slug
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
+    id: "campaigns",
+    header: "Campaigns",
     cell: ({ row }) => {
-      return <div className="font-mono text-muted-foreground">{row.getValue("slug")}</div>
-    },
-  },
-  {
-    accessorKey: "campaign.title",
-    header: ({ column }) => {
+      const campaigns = row.original.campaigns || []
+      if (campaigns.length === 0) {
+        return <div className="text-muted-foreground">No campaigns</div>
+      }
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Campaign Title
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const campaign = row.original.campaign
-      const title = campaign?.title || "No Campaign"
-      return <div className="font-medium text-muted-foreground">{truncateText(title, 30)}</div>
-    },
-  },
-  {
-    accessorKey: "campaign.status",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Status
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      )
-    },
-    cell: ({ row }) => {
-      const campaign = row.original.campaign
-      const status = campaign?.status || "No Campaign"
-      return (
-        <div className="flex w-[100px]">
-          <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
-            campaign ? (status === 'Active' 
-              ? 'bg-green-50 text-green-700 ring-green-600/20' 
-              : 'bg-gray-50 text-gray-600 ring-gray-500/10') 
-              : 'bg-gray-50 text-gray-500 ring-gray-400/20'
-          }`}>
-            {status}
-          </span>
+        <div className="space-y-1">
+          {campaigns.slice(0, 2).map((campaign, index) => (
+            <div key={campaign.id} className="text-sm">
+              {truncateText(campaign.title, 20)}
+            </div>
+          ))}
+          {campaigns.length > 2 && (
+            <div className="text-xs text-muted-foreground">+{campaigns.length - 2} more</div>
+          )}
         </div>
       )
     },

@@ -5,6 +5,7 @@ import { Input } from "~/components/ui/input"
 import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
 import { DatePicker } from "~/components/ui/date-picker"
+import { Combobox } from "~/components/ui/combobox"
 import {
   Select,
   SelectContent,
@@ -26,7 +27,14 @@ type Campaign = {
   start_date: string
   end_date: string
   status: 'draft' | 'active' | 'paused' | 'completed'
+  slug: string
+  landingpage_id: string | null
   prospect_filter?: ProspectFilterType
+}
+
+type Landingpage = {
+  id: string
+  title: string
 }
 
 type ValidationErrors = {
@@ -44,17 +52,41 @@ export default function CampaignForm() {
     start_date: '',
     end_date: '',
     status: 'draft',
+    slug: '',
+    landingpage_id: null,
     prospect_filter: {}
   })
+  const [landingpages, setLandingpages] = useState<Landingpage[]>([])
   const [loading, setLoading] = useState(false)
   const [fetchingData, setFetchingData] = useState(isEditing)
+  const [fetchingLandingpages, setFetchingLandingpages] = useState(true)
   const [errors, setErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
-    if (isEditing && id) {
-      fetchCampaign(id)
+    const initializeData = async () => {
+      await fetchLandingpages()
+      if (isEditing && id) {
+        await fetchCampaign(id)
+      }
     }
+    initializeData()
   }, [id, isEditing])
+
+  const fetchLandingpages = async () => {
+    try {
+      setFetchingLandingpages(true)
+      const response = await apiHelpers.paginated(
+        "/api/landingpages",
+        { page: 1, per_page: 100 },
+        { requiresAuth: true }
+      )
+      setLandingpages(response.data)
+    } catch (error) {
+      console.error('Failed to fetch landing pages:', error)
+    } finally {
+      setFetchingLandingpages(false)
+    }
+  }
 
   const fetchCampaign = async (campaignId: string) => {
     try {
@@ -68,6 +100,8 @@ export default function CampaignForm() {
         start_date: campaign.start_date ? campaign.start_date.split('T')[0] : '',
         end_date: campaign.end_date ? campaign.end_date.split('T')[0] : '',
         status: campaign.status.toLowerCase(),
+        slug: campaign.slug || '',
+        landingpage_id: campaign.landingpage?.id || null,
         prospect_filter: campaign.prospect_filter ? transformProspectFilterFromAPI(campaign.prospect_filter) : {}
       })
     } catch (error) {
@@ -121,7 +155,24 @@ export default function CampaignForm() {
     return errors[field]?.[0]
   }
 
-  if (fetchingData) {
+  const generateSlug = (title: string) => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+  }
+
+  const handleTitleBlur = () => {
+    if (formData.title && !formData.slug) {
+      const generatedSlug = generateSlug(formData.title)
+      setFormData({ ...formData, slug: generatedSlug })
+    }
+  }
+
+  if (fetchingData || fetchingLandingpages) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex items-center justify-center h-64">
@@ -164,11 +215,48 @@ export default function CampaignForm() {
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onBlur={handleTitleBlur}
                 className={getFieldError('title') ? 'border-red-500' : ''}
                 placeholder="Enter campaign title"
               />
               {getFieldError('title') && (
                 <p className="text-sm text-red-600">{getFieldError('title')}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug</Label>
+              <Input
+                id="slug"
+                value={formData.slug}
+                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                className={getFieldError('slug') ? 'border-red-500' : ''}
+                placeholder="Enter URL slug (e.g., my-campaign)"
+              />
+              {getFieldError('slug') && (
+                <p className="text-sm text-red-600">{getFieldError('slug')}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="landingpage_id">Landing Page</Label>
+              <Combobox
+                options={[
+                  { value: "", label: "No Landing Page" },
+                  ...landingpages.map((landingpage) => ({
+                    value: landingpage.id,
+                    label: landingpage.title,
+                  }))
+                ]}
+                value={formData.landingpage_id || ""}
+                onValueChange={(value) => setFormData({ ...formData, landingpage_id: value || null })}
+                placeholder="Select a landing page"
+                emptyMessage="No landing pages found."
+                className={getFieldError('landingpage_id') ? 'border-red-500' : ''}
+                disabled={fetchingLandingpages}
+              />
+              {getFieldError('landingpage_id') && (
+                <p className="text-sm text-red-600">{getFieldError('landingpage_id')}</p>
               )}
             </div>
 
