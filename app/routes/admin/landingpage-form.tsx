@@ -139,24 +139,7 @@ export default function LandingpageForm() {
     return errors[field]?.[0]
   }
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-') // Replace spaces with hyphens
-      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-      .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
-  }
-
-  const handleTitleBlur = () => {
-    if (formData.title && !formData.slug) {
-      const generatedSlug = generateSlug(formData.title)
-      setFormData({ ...formData, slug: generatedSlug })
-    }
-  }
-
-  if (fetchingData || fetchingCampaigns) {
+  if (fetchingData) {
     return (
       <div className="container mx-auto py-6">
         <div className="flex items-center justify-center h-64">
@@ -194,53 +177,16 @@ export default function LandingpageForm() {
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="campaign_id">Campaign</Label>
-              <Combobox
-                options={[
-                  { value: "", label: "No Campaign" },
-                  ...campaigns.map((campaign) => ({
-                    value: campaign.id,
-                    label: campaign.title,
-                  }))
-                ]}
-                value={formData.campaign_id || ""}
-                onValueChange={(value) => setFormData({ ...formData, campaign_id: value || null })}
-                placeholder="Select a campaign"
-                emptyMessage="No campaigns found."
-                className={getFieldError('campaign_id') ? 'border-red-500' : ''}
-                disabled={fetchingCampaigns}
-              />
-              {getFieldError('campaign_id') && (
-                <p className="text-sm text-red-600">{getFieldError('campaign_id')}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                onBlur={handleTitleBlur}
                 className={getFieldError('title') ? 'border-red-500' : ''}
                 placeholder="Enter landing page title"
               />
               {getFieldError('title') && (
                 <p className="text-sm text-red-600">{getFieldError('title')}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
-              <Input
-                id="slug"
-                value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                className={getFieldError('slug') ? 'border-red-500' : ''}
-                placeholder="Enter URL slug (e.g., my-landing-page)"
-              />
-              {getFieldError('slug') && (
-                <p className="text-sm text-red-600">{getFieldError('slug')}</p>
               )}
             </div>
 

@@ -10,11 +10,12 @@ export interface Campaign {
     gender?: string;
     source?: string;
   };
-  landingpage: {
+  slug: string;
+  landingpage_id: string | null;
+  landingpage?: {
     id: string;
     title: string;
-    slug: string;
-  };
+  } | null;
 }
 
 export interface PaginationMeta {
@@ -73,22 +74,22 @@ export interface LandingpageSection {
 
 export interface Landingpage {
   id: string;
-  campaign: {
+  campaigns: {
     id: string;
     title: string;
     description: string;
     start_date: string;
     end_date: string;
     status: string;
+    slug: string;
     prospect_filter: {
       max_age?: number;
       min_age?: number;
       gender?: string;
       source?: string;
     };
-  } | null;
+  }[];
   title: string;
-  slug: string;
   headline: string;
   subline: string;
   sections: LandingpageSection[];
