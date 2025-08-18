@@ -244,7 +244,7 @@ export function SearchFilter({
             placeholder={`Enter exact ${getFieldLabel(key).toLowerCase()}`}
             min={range.min}
             max={range.max}
-            step={key === 'age' ? 1 : 0.1}
+            step={key === 'age' ? 1 : (key === 'address.latitude' || key === 'address.longitude') ? 0.000001 : 0.01}
             className="w-full px-3 py-2 border rounded-md text-sm"
           />
         ) : (
@@ -269,7 +269,7 @@ export function SearchFilter({
                 }
                 onValueChange?.(newValue)
               }}
-              step={key === 'age' ? 1 : 0.1}
+              step={key === 'age' ? 1 : (key === 'address.latitude' || key === 'address.longitude') ? 0.000001 : 0.01}
             />
           </div>
         )}
