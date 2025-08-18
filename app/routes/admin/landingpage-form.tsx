@@ -21,7 +21,6 @@ type Landingpage = {
   id?: string
   campaign_id: string | null
   title: string
-  slug: string
   headline: string
   subline: string
   sections: LandingpageSection[]
@@ -44,7 +43,6 @@ export default function LandingpageForm() {
   const [formData, setFormData] = useState<Landingpage>({
     campaign_id: null,
     title: '',
-    slug: '',
     headline: '',
     subline: '',
     sections: []
@@ -87,7 +85,6 @@ export default function LandingpageForm() {
         id: landingpage.id,
         campaign_id: landingpage.campaign?.id || null,
         title: landingpage.title,
-        slug: landingpage.slug,
         headline: landingpage.headline,
         subline: landingpage.subline,
         sections: (landingpage.sections || []).map(section => ({
@@ -121,12 +118,16 @@ export default function LandingpageForm() {
     } catch (error: any) {
       if (error.message.includes('API Error:')) {
         try {
-          const errorMessage = error.message.split('API Error: ')[1]
-          const errorData = JSON.parse(errorMessage.split(' Status: ')[0])
-          if (errorData.errors) {
-            setErrors(errorData.errors)
+          const errorMessage = error.message.replace('API Error: ', '')
+          // Extract status code (e.g., "422 {...}")
+          const statusMatch = errorMessage.match(/^(\d+)\s+(.+)/)
+          if (statusMatch && statusMatch[2]) {
+            const errorData = JSON.parse(statusMatch[2])
+            if (errorData.errors) {
+              setErrors(errorData.errors)
+            }
           }
-        } catch {
+        } catch (parseError) {
           console.error('Failed to parse error:', error)
         }
       }
@@ -201,6 +202,28 @@ export default function LandingpageForm() {
               />
               {getFieldError('headline') && (
                 <p className="text-sm text-red-600">{getFieldError('headline')}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="campaign_id">Campaign</Label>
+              <Combobox
+                options={[
+                  { value: "", label: "No Campaign" },
+                  ...campaigns.map((campaign) => ({
+                    value: campaign.id,
+                    label: campaign.title,
+                  }))
+                ]}
+                value={formData.campaign_id || ""}
+                onValueChange={(value) => setFormData({ ...formData, campaign_id: value || null })}
+                placeholder="Select a campaign"
+                emptyMessage="No campaigns found."
+                className={getFieldError('campaign_id') ? 'border-red-500' : ''}
+                disabled={fetchingCampaigns}
+              />
+              {getFieldError('campaign_id') && (
+                <p className="text-sm text-red-600">{getFieldError('campaign_id')}</p>
               )}
             </div>
 
