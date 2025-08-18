@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router"
-import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
 import { Textarea } from "~/components/ui/textarea"
 import { DatePicker } from "~/components/ui/date-picker"
 import { Combobox } from "~/components/ui/combobox"
@@ -13,12 +11,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
+import { FormLayout } from "~/components/ui/form-layout"
+import { FormField } from "~/components/ui/form-field"
+import { FormActions } from "~/components/ui/form-actions"
 
-import { ArrowLeft, Loader2 } from "lucide-react"
 import { apiHelpers } from "~/lib/api"
 import { ProspectFilter } from "~/components/prospect-filter"
 import type { ProspectFilter as ProspectFilterType } from "~/services/prospects"
 import { transformProspectFilterForAPI, transformProspectFilterFromAPI } from "~/utils/prospect-filter"
+import { useFormWithValidation } from "~/hooks/useFormWithValidation"
 
 type Campaign = {
   id?: string
@@ -37,30 +38,38 @@ type Landingpage = {
   title: string
 }
 
-type ValidationErrors = {
-  [key: string]: string[]
-}
 
 export default function CampaignForm() {
   const navigate = useNavigate()
   const { id } = useParams()
   const isEditing = !!id
 
-  const [formData, setFormData] = useState<Campaign>({
-    title: '',
-    description: '',
-    start_date: '',
-    end_date: '',
-    status: 'draft',
-    slug: '',
-    landingpage_id: null,
-    prospect_filter: {}
+  const {
+    formData,
+    updateFormData,
+    errors,
+    loading,
+    getFieldError,
+    submitForm
+  } = useFormWithValidation<Campaign>({
+    initialData: {
+      title: '',
+      description: '',
+      start_date: '',
+      end_date: '',
+      status: 'draft',
+      slug: '',
+      landingpage_id: null,
+      prospect_filter: {}
+    },
+    endpoint: '/api/campaigns',
+    redirectPath: '/admin/campaign',
+    onSuccess: () => navigate('/admin/campaign')
   })
+
   const [landingpages, setLandingpages] = useState<Landingpage[]>([])
-  const [loading, setLoading] = useState(false)
   const [fetchingData, setFetchingData] = useState(isEditing)
   const [fetchingLandingpages, setFetchingLandingpages] = useState(true)
-  const [errors, setErrors] = useState<ValidationErrors>({})
 
   useEffect(() => {
     const initializeData = async () => {
@@ -93,7 +102,7 @@ export default function CampaignForm() {
       setFetchingData(true)
       const response = await apiHelpers.get(`/api/campaigns/${campaignId}`, { requiresAuth: true })
       const campaign = response.data
-      setFormData({
+      updateFormData({
         id: campaign.id,
         title: campaign.title,
         description: campaign.description,
@@ -114,50 +123,19 @@ export default function CampaignForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setErrors({})
 
-    try {
-      const submitData = {
-        ...formData,
-        start_date: formData.start_date ? `${formData.start_date}T00:00:00.000Z` : null,
-        end_date: formData.end_date ? `${formData.end_date}T23:59:59.000Z` : null,
-        prospect_filter: formData.prospect_filter && Object.keys(formData.prospect_filter).length > 0 
-          ? transformProspectFilterForAPI(formData.prospect_filter)
-          : undefined
-      }
-
-      if (isEditing && id) {
-        await apiHelpers.put(`/api/campaigns/${id}`, submitData, { requiresAuth: true, includeCSRF: true })
-      } else {
-        await apiHelpers.post('/api/campaigns', submitData, { requiresAuth: true, includeCSRF: true })
-      }
-
-      navigate('/admin/campaign')
-    } catch (error: any) {
-      if (error.message.includes('API Error:')) {
-        try {
-          const errorMessage = error.message.replace('API Error: ', '')
-          // Extract status code (e.g., "422 {...}")
-          const statusMatch = errorMessage.match(/^(\d+)\s+(.+)/)
-          if (statusMatch && statusMatch[2]) {
-            const errorData = JSON.parse(statusMatch[2])
-            if (errorData.errors) {
-              setErrors(errorData.errors)
-            }
-          }
-        } catch (parseError) {
-          console.error('Failed to parse error:', error)
-        }
-      }
-    } finally {
-      setLoading(false)
+    const submitData = {
+      ...formData,
+      start_date: formData.start_date ? `${formData.start_date}T00:00:00.000Z` : null,
+      end_date: formData.end_date ? `${formData.end_date}T23:59:59.000Z` : null,
+      prospect_filter: formData.prospect_filter && Object.keys(formData.prospect_filter).length > 0 
+        ? transformProspectFilterForAPI(formData.prospect_filter)
+        : undefined
     }
+
+    await submitForm(submitData, { isEditing, id })
   }
 
-  const getFieldError = (field: string) => {
-    return errors[field]?.[0]
-  }
 
   const generateSlug = (title: string) => {
     return title
@@ -172,78 +150,52 @@ export default function CampaignForm() {
   const handleTitleBlur = () => {
     if (formData.title && !formData.slug) {
       const generatedSlug = generateSlug(formData.title)
-      setFormData({ ...formData, slug: generatedSlug })
+      updateFormData({ slug: generatedSlug })
     }
   }
 
-  if (fetchingData || fetchingLandingpages) {
-    return (
-      <div className="container mx-auto py-6">
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="container mx-auto py-6">
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/admin/campaign')}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Campaigns
-        </Button>
-        <h1 className="text-2xl font-bold">
-          {isEditing ? 'Edit Campaign' : 'Create New Campaign'}
-        </h1>
-      </div>
-
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">Campaign Details</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            {isEditing 
-              ? 'Update the campaign details below.' 
-              : 'Create a new campaign by filling out the form below.'
-            }
-          </p>
-        </div>
+    <FormLayout
+      title={isEditing ? 'Edit Campaign' : 'Create New Campaign'}
+      description={isEditing ? 'Update the campaign details below.' : 'Create a new campaign by filling out the form below.'}
+      backPath="/admin/campaign"
+      isLoading={fetchingData || fetchingLandingpages}
+    >
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+            <FormField
+              label="Title"
+              htmlFor="title"
+              error={getFieldError('title')}
+            >
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) => updateFormData({ title: e.target.value })}
                 onBlur={handleTitleBlur}
                 className={getFieldError('title') ? 'border-red-500' : ''}
                 placeholder="Enter campaign title"
               />
-              {getFieldError('title') && (
-                <p className="text-sm text-red-600">{getFieldError('title')}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="slug">Slug</Label>
+            <FormField
+              label="Slug"
+              htmlFor="slug"
+              error={getFieldError('slug')}
+            >
               <Input
                 id="slug"
                 value={formData.slug}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                onChange={(e) => updateFormData({ slug: e.target.value })}
                 className={getFieldError('slug') ? 'border-red-500' : ''}
                 placeholder="Enter URL slug (e.g., my-campaign)"
               />
-              {getFieldError('slug') && (
-                <p className="text-sm text-red-600">{getFieldError('slug')}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="landingpage_id">Landing Page</Label>
+            <FormField
+              label="Landing Page"
+              htmlFor="landingpage_id"
+              error={getFieldError('landingpage_id')}
+            >
               <Combobox
                 options={[
                   { value: "", label: "No Landing Page" },
@@ -253,65 +205,67 @@ export default function CampaignForm() {
                   }))
                 ]}
                 value={formData.landingpage_id || ""}
-                onValueChange={(value) => setFormData({ ...formData, landingpage_id: value || null })}
+                onValueChange={(value) => updateFormData({ landingpage_id: value || null })}
                 placeholder="Select a landing page"
                 emptyMessage="No landing pages found."
                 className={getFieldError('landingpage_id') ? 'border-red-500' : ''}
                 disabled={fetchingLandingpages}
               />
-              {getFieldError('landingpage_id') && (
-                <p className="text-sm text-red-600">{getFieldError('landingpage_id')}</p>
-              )}
-            </div>
+            </FormField>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+            <FormField
+              label="Description"
+              htmlFor="description"
+              error={getFieldError('description')}
+            >
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => updateFormData({ description: e.target.value })}
                 rows={4}
                 className={getFieldError('description') ? 'border-red-500' : ''}
                 placeholder="Enter campaign description"
               />
-              {getFieldError('description') && (
-                <p className="text-sm text-red-600">{getFieldError('description')}</p>
-              )}
-            </div>
+            </FormField>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <FormField
+                label="Start Date"
+                htmlFor="start_date"
+                error={getFieldError('start_date')}
+              >
                 <DatePicker
-                  label="Start Date"
+                  label=""
                   value={formData.start_date}
-                  onChange={(date) => setFormData({ ...formData, start_date: date })}
+                  onChange={(date) => updateFormData({ start_date: date })}
                   placeholder="Select start date"
                   error={!!getFieldError('start_date')}
                 />
-                {getFieldError('start_date') && (
-                  <p className="text-sm text-red-600">{getFieldError('start_date')}</p>
-                )}
-              </div>
-              <div className="space-y-2">
+              </FormField>
+              <FormField
+                label="End Date"
+                htmlFor="end_date"
+                error={getFieldError('end_date')}
+              >
                 <DatePicker
-                  label="End Date"
+                  label=""
                   value={formData.end_date}
-                  onChange={(date) => setFormData({ ...formData, end_date: date })}
+                  onChange={(date) => updateFormData({ end_date: date })}
                   placeholder="Select end date"
                   error={!!getFieldError('end_date')}
                 />
-                {getFieldError('end_date') && (
-                  <p className="text-sm text-red-600">{getFieldError('end_date')}</p>
-                )}
-              </div>
+              </FormField>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+            <FormField
+              label="Status"
+              htmlFor="status"
+              error={getFieldError('status')}
+            >
               <Select
                 value={formData.status}
                 onValueChange={(value: 'draft' | 'active' | 'paused' | 'completed') =>
-                  setFormData({ ...formData, status: value })
+                  updateFormData({ status: value })
                 }
               >
                 <SelectTrigger className={`w-full ${getFieldError('status') ? 'border-red-500' : ''}`}>
@@ -324,35 +278,21 @@ export default function CampaignForm() {
                   <SelectItem value="completed">Completed</SelectItem>
                 </SelectContent>
               </Select>
-              {getFieldError('status') && (
-                <p className="text-sm text-red-600">{getFieldError('status')}</p>
-              )}
-            </div>
+            </FormField>
 
             <div className="space-y-2">
               <ProspectFilter
                 value={formData.prospect_filter}
-                onValueChange={(filter) => setFormData({ ...formData, prospect_filter: filter })}
+                onValueChange={(filter) => updateFormData({ prospect_filter: filter })}
               />
             </div>
             
-            <div className="flex gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate('/admin/campaign')}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading 
-                  ? (isEditing ? 'Updating...' : 'Creating...') 
-                  : (isEditing ? 'Update Campaign' : 'Create Campaign')
-                }
-              </Button>
-            </div>
+            <FormActions
+              isEditing={isEditing}
+              isLoading={loading}
+              onCancel={() => navigate('/admin/campaign')}
+            />
           </form>
-        </div>
-    </div>
+    </FormLayout>
   )
 }
