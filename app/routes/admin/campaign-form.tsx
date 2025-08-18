@@ -137,12 +137,16 @@ export default function CampaignForm() {
     } catch (error: any) {
       if (error.message.includes('API Error:')) {
         try {
-          const errorMessage = error.message.split('API Error: ')[1]
-          const errorData = JSON.parse(errorMessage.split(' Status: ')[0])
-          if (errorData.errors) {
-            setErrors(errorData.errors)
+          const errorMessage = error.message.replace('API Error: ', '')
+          // Extract status code (e.g., "422 {...}")
+          const statusMatch = errorMessage.match(/^(\d+)\s+(.+)/)
+          if (statusMatch && statusMatch[2]) {
+            const errorData = JSON.parse(statusMatch[2])
+            if (errorData.errors) {
+              setErrors(errorData.errors)
+            }
           }
-        } catch {
+        } catch (parseError) {
           console.error('Failed to parse error:', error)
         }
       }
