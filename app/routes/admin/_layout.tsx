@@ -14,7 +14,7 @@ export async function clientLoader() {
     const user = await apiHelpers.get("/api/user");
     return { user };
   } catch (error) {
-    throw redirect("/login");
+    throw redirect("/admin/login");
   }
 }
 
@@ -32,7 +32,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       // Even if logout fails, redirect to login
       console.warn("Logout failed:", error);
     }
-    return redirect("/login");
+    return redirect("/admin/login");
   }
 
   return null;

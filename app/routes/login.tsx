@@ -1,5 +1,5 @@
 import { redirect } from "react-router";
-import type { Route } from "./+types/login";
+import type { Route } from "./+types/admin/login";
 import { api, apiHelpers } from "../lib/api";
 import { LoginForm } from "../components/login-form";
 

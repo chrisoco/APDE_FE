@@ -140,7 +140,7 @@ interface PaginationOptions {
 
 The wrapper automatically:
 - Throws errors for non-2xx responses
-- Redirects to `/login` when `requiresAuth: true` and response is 401
+- Redirects to `/admin/login` when `requiresAuth: true` and response is 401
 - Includes response status and error text in error messages
 
 ```typescript
@@ -173,7 +173,7 @@ export async function clientLoader() {
     const user = await apiHelpers.get("/api/user");
     return { user };
   } catch (error) {
-    throw redirect("/login");
+    throw redirect("/admin/login");
   }
 }
 ```
