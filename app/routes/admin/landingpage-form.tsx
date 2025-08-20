@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router"
 import { Input } from "~/components/ui/input"
 import { Textarea } from "~/components/ui/textarea"
-import { Combobox } from "~/components/ui/combobox"
 import { SectionsRepeater } from "~/components/ui/sections-repeater"
 import { FormLayout } from "~/components/ui/form-layout"
 import { FormField } from "~/components/ui/form-field"
@@ -20,17 +19,12 @@ type LandingpageSection = {
 
 type Landingpage = {
   id?: string
-  campaign_id: string | null
   title: string
   headline: string
   subline: string
   sections: LandingpageSection[]
 }
 
-type Campaign = {
-  id: string
-  title: string
-}
 
 
 export default function LandingpageForm() {
@@ -47,7 +41,6 @@ export default function LandingpageForm() {
     submitForm
   } = useFormWithValidation<Landingpage>({
     initialData: {
-      campaign_id: null,
       title: '',
       headline: '',
       subline: '',
@@ -58,32 +51,14 @@ export default function LandingpageForm() {
     onSuccess: () => navigate('/admin/landingpage')
   })
 
-  const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [fetchingData, setFetchingData] = useState(isEditing)
-  const [fetchingCampaigns, setFetchingCampaigns] = useState(true)
 
   useEffect(() => {
-    fetchCampaigns()
     if (isEditing && id) {
       fetchLandingpage(id)
     }
   }, [id, isEditing])
 
-  const fetchCampaigns = async () => {
-    try {
-      setFetchingCampaigns(true)
-      const response = await apiHelpers.paginated(
-        "/api/campaigns",
-        { page: 1, per_page: 100 },
-        { requiresAuth: true }
-      )
-      setCampaigns(response.data)
-    } catch (error) {
-      console.error('Failed to fetch campaigns:', error)
-    } finally {
-      setFetchingCampaigns(false)
-    }
-  }
 
   const fetchLandingpage = async (landingpageId: string) => {
     try {
@@ -92,7 +67,6 @@ export default function LandingpageForm() {
       const landingpage = response.data
       updateFormData({
         id: landingpage.id,
-        campaign_id: landingpage.campaign?.id || null,
         title: landingpage.title,
         headline: landingpage.headline,
         subline: landingpage.subline,
@@ -153,27 +127,6 @@ export default function LandingpageForm() {
               />
             </FormField>
 
-            <FormField
-              label="Campaign"
-              htmlFor="campaign_id"
-              error={getFieldError('campaign_id')}
-            >
-              <Combobox
-                options={[
-                  { value: "", label: "No Campaign" },
-                  ...campaigns.map((campaign) => ({
-                    value: campaign.id,
-                    label: campaign.title,
-                  }))
-                ]}
-                value={formData.campaign_id || ""}
-                onValueChange={(value) => updateFormData({ campaign_id: value || null })}
-                placeholder="Select a campaign"
-                emptyMessage="No campaigns found."
-                className={getFieldError('campaign_id') ? 'border-red-500' : ''}
-                disabled={fetchingCampaigns}
-              />
-            </FormField>
 
             <FormField
               label="Subline"

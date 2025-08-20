@@ -69,6 +69,8 @@ export function AdminListLayout<T>({
       <DataTable 
         columns={columns} 
         data={data?.data || []} 
+        searchKey="title"
+        searchPlaceholder={`Filter ${title.toLowerCase()}...`}
       />
 
       <DeleteDialog
