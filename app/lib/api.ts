@@ -44,7 +44,7 @@ export async function api(endpoint: string, options: ApiOptions = {}): Promise<R
   const response = await fetch(url, config);
 
   if (requiresAuth && !response.ok && response.status === 401) {
-    window.location.href = "/login";
+    window.location.href = "/admin/login";
     throw new Error("Authentication required");
   }
 

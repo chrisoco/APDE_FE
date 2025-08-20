@@ -25,7 +25,7 @@ export function LoginForm({
               <div className="flex flex-col items-center text-center">
                 <h1 className="text-2xl font-bold">Welcome back</h1>
                 <p className="text-muted-foreground text-balance">
-                  Login to your APDE FE account
+                  Login to your APDE account
                 </p>
               </div>
               <div className="grid gap-3">
@@ -64,7 +64,11 @@ export function LoginForm({
                   {actionData.error}
                 </div>
               )}
-              <Button type="submit" className="w-full" disabled={busy}>
+              <Button 
+                type="submit" 
+                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 font-semibold shadow-sm hover:shadow-md border border-blue-200 hover:border-blue-300 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" 
+                disabled={busy}
+              >
                 {busy ? "Signing in..." : "Login"}
               </Button>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
@@ -109,12 +113,47 @@ export function LoginForm({
               </div>
             </div>
           </Form>
-          <div className="bg-muted relative hidden md:block">
-            <img
-              src="https://images.unsplash.com/photo-1590069261209-f8e9b8642343?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1376&q=80"
-              alt="Modern office workspace"
-              className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-            />
+          <div className="relative hidden md:block bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 via-purple-600/90 to-pink-600/90" />
+            <div className="absolute inset-0 opacity-20">
+              <div className="h-full w-full bg-white/5" style={{
+                backgroundImage: 'radial-gradient(circle at 25% 25%, white 2px, transparent 2px)',
+                backgroundSize: '30px 30px'
+              }} />
+            </div>
+            <div className="relative flex h-full items-center justify-center p-8">
+              <div className="text-center text-white">
+                <div className="mb-6 flex justify-center">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                    <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                </div>
+                <h2 className="text-2xl font-bold mb-4">Welcome to APDE</h2>
+                <p className="text-white/90 text-lg mb-6">Your powerful web campaign management platform</p>
+                <div className="space-y-3 text-white/80 text-sm">
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Advanced Campaign Analytics</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Landing Page Builder</span>
+                  </div>
+                  <div className="flex items-center justify-center gap-2">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Email Campaign Automation</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

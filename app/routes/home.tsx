@@ -38,7 +38,7 @@ export default function Home() {
               
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Link
-                  to="/login"
+                  to="/admin/login"
                   className="rounded-md bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
                 >
                   Get Started

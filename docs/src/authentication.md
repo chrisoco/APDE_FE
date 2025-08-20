@@ -71,7 +71,7 @@ export async function clientLoader() {
     const user = await apiHelpers.get("/api/user");
     return { user };
   } catch (error) {
-    throw redirect("/login");
+    throw redirect("/admin/login");
   }
 }
 ```
@@ -92,7 +92,7 @@ const data = await apiHelpers.get("/api/campaigns", {
 });
 ```
 
-This automatically redirects to `/login` on 401 responses.
+This automatically redirects to `/admin/login` on 401 responses.
 
 ## File Structure
 
@@ -153,7 +153,7 @@ export async function clientLoader() {
     const user = await apiHelpers.get("/api/user");
     return { user };
   } catch (error) {
-    throw redirect("/login");
+    throw redirect("/admin/login");
   }
 }
 ```
@@ -187,7 +187,7 @@ Backend CORS should allow:
 ### Authentication Errors
 
 The API wrapper automatically handles:
-- **401 Unauthorized**: Redirects to `/login` when `requiresAuth: true`
+- **401 Unauthorized**: Redirects to `/admin/login` when `requiresAuth: true`
 - **CSRF Failures**: Shows descriptive error messages
 - **Network Errors**: Provides fallback error messages
 
@@ -214,9 +214,9 @@ export async function logoutAction() {
       requiresAuth: true,
       includeCSRF: true
     });
-    return redirect("/login");
+    return redirect("/admin/login");
   } catch (error) {
-    return redirect("/login"); // Redirect anyway
+    return redirect("/admin/login"); // Redirect anyway
   }
 }
 ```
