@@ -96,3 +96,30 @@ export interface Landingpage {
 }
 
 export type LandingpageResponse = PaginatedResponse<Landingpage>;
+
+export interface PublicLandingpageSection {
+  text: string;
+  image_url: string;
+  cta_text: string;
+  cta_url: string;
+}
+
+export interface PublicLandingpage {
+  id: string;
+  title: string;
+  headline: string;
+  subline: string;
+  sections: PublicLandingpageSection[];
+}
+
+export interface PublicCampaignData {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  landingpage: PublicLandingpage;
+}
+
+export interface PublicCampaignResponse {
+  data: PublicCampaignData;
+}
