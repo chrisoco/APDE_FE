@@ -11,6 +11,7 @@ import {
   IconHelp,
   IconInnerShadowTop,
   IconListDetails,
+  IconMail,
   IconReport,
   IconSearch,
   IconSettings,
@@ -58,6 +59,11 @@ const data = {
       title: "Landing Pages",
       url: "/admin/landingpage",
       icon: IconChartBar,
+    },
+    {
+      title: "Campaign Outbox",
+      url: "/admin/campaign-outbox",
+      icon: IconMail,
     },
   ],
   navClouds: [
