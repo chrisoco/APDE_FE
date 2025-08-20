@@ -46,6 +46,11 @@ const data = {
       icon: IconDashboard,
     },
     {
+      title: "Campaign Outbox",
+      url: "/admin/campaign-outbox",
+      icon: IconMail,
+    },
+    {
       title: "Prospects",
       url: "/admin/prospects",
       icon: IconUsers,
@@ -59,11 +64,6 @@ const data = {
       title: "Landing Pages",
       url: "/admin/landingpage",
       icon: IconChartBar,
-    },
-    {
-      title: "Campaign Outbox",
-      url: "/admin/campaign-outbox",
-      icon: IconMail,
     },
   ],
   navClouds: [
