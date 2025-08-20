@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Campaign } from "../../lib/types";
 import { apiHelpers } from "../../lib/api";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Combobox } from "../../components/ui/combobox";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
@@ -34,6 +34,11 @@ export default function CampaignOutbox() {
   const [campaignsLoaded, setCampaignsLoaded] = useState(false);
   const [sentStats, setSentStats] = useState<SentEmailsStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
+
+  // Load campaigns on component mount
+  useEffect(() => {
+    loadCampaigns();
+  }, []);
 
   const loadCampaigns = async () => {
     if (campaignsLoaded) return;
@@ -110,34 +115,39 @@ export default function CampaignOutbox() {
         <CardHeader>
           <CardTitle>Send Campaign Emails</CardTitle>
           <CardDescription>
-            Select a campaign and configure sending options
+            Select a campaign and configure sending options<br />
+            {import.meta.env.VITE_APP_ENV === 'local' && (
+              <span className="text-red-400">
+                For development purpose only one email will be sent and on "Allow duplicate mailing" three.
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="campaign-select">Active Campaigns</Label>
-            <Select 
-              value={selectedCampaignId} 
+            <Combobox
+              options={[
+                { value: "", label: "Select an active campaign" },
+                ...campaigns.map((campaign) => ({
+                  value: campaign.id,
+                  label: campaign.title,
+                }))
+              ]}
+              value={selectedCampaignId}
               onValueChange={(value) => {
                 setSelectedCampaignId(value);
                 if (value) {
                   loadSentStats(value);
                 }
+                if (!campaignsLoaded) {
+                  loadCampaigns();
+                }
               }}
+              placeholder={loadingCampaigns ? "Loading active campaigns..." : "Search active campaigns..."}
+              emptyMessage="No active campaigns found."
               disabled={loadingCampaigns}
-              onOpenChange={(open) => open && loadCampaigns()}
-            >
-              <SelectTrigger id="campaign-select">
-                <SelectValue placeholder={loadingCampaigns ? "Loading active campaigns..." : "Select an active campaign"} />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map((campaign) => (
-                  <SelectItem key={campaign.id} value={campaign.id}>
-                    {campaign.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           <Card>

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Route } from "../+types/admin";
 import type { Campaign } from "../../lib/types";
 import { apiHelpers } from "../../lib/api";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import { Combobox } from "../../components/ui/combobox";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -59,6 +59,11 @@ export default function AdminIndex(_: Route.ComponentProps) {
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
   const [campaignsLoaded, setCampaignsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load campaigns on component mount
+  useEffect(() => {
+    loadCampaigns();
+  }, []);
 
   const loadCampaigns = async () => {
     if (campaignsLoaded) return;
@@ -117,28 +122,28 @@ export default function AdminIndex(_: Route.ComponentProps) {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="campaign-select">Select Campaign</Label>
-            <Select 
-              value={selectedCampaignId} 
+            <Combobox
+              options={[
+                { value: "", label: "Select a campaign" },
+                ...campaigns.map((campaign) => ({
+                  value: campaign.id,
+                  label: `${campaign.title} (${campaign.status})`,
+                }))
+              ]}
+              value={selectedCampaignId}
               onValueChange={(value) => {
                 setSelectedCampaignId(value);
                 if (value) {
                   loadAnalytics(value);
                 }
+                if (!campaignsLoaded) {
+                  loadCampaigns();
+                }
               }}
+              placeholder={loadingCampaigns ? "Loading campaigns..." : "Search campaigns..."}
+              emptyMessage="No campaigns found."
               disabled={loadingCampaigns}
-              onOpenChange={(open) => open && loadCampaigns()}
-            >
-              <SelectTrigger id="campaign-select">
-                <SelectValue placeholder={loadingCampaigns ? "Loading campaigns..." : "Select a campaign"} />
-              </SelectTrigger>
-              <SelectContent>
-                {campaigns.map((campaign) => (
-                  <SelectItem key={campaign.id} value={campaign.id}>
-                    {campaign.title} ({campaign.status})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
 
           {error && (
