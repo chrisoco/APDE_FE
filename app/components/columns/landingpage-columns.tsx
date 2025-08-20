@@ -4,6 +4,7 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Badge } from "~/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -68,18 +69,15 @@ export const landingpageColumns = (
     cell: ({ row }) => {
       const campaigns = row.original.campaigns || []
       if (campaigns.length === 0) {
-        return <div className="text-muted-foreground">No campaigns</div>
+        return <div className="text-muted-foreground text-sm">No campaigns</div>
       }
       return (
-        <div className="space-y-1">
-          {campaigns.slice(0, 2).map((campaign, index) => (
-            <div key={campaign.id} className="text-sm">
+        <div className="flex flex-wrap gap-1">
+          {campaigns.map((campaign) => (
+            <Badge key={campaign.id} variant="secondary" className="text-xs">
               {truncateText(campaign.title, 20)}
-            </div>
+            </Badge>
           ))}
-          {campaigns.length > 2 && (
-            <div className="text-xs text-muted-foreground">+{campaigns.length - 2} more</div>
-          )}
         </div>
       )
     },
