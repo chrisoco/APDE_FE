@@ -44,7 +44,10 @@ export async function clientAction({ request }: ClientActionFunctionArgs) {
         const errorMessage = error.message.split("API Error: ")[1];
         const data = JSON.parse(errorMessage.split(" ").slice(1).join(" "));
         if (data?.message) message = data.message;
-      } catch {}
+      } catch (parseError) {
+        // Ignore JSON parsing errors
+        console.debug('Failed to parse error message as JSON:', parseError);
+      }
     }
     return { error: message };
   }

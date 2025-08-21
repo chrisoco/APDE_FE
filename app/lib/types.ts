@@ -34,7 +34,6 @@ export interface Campaign {
   } | null;
 }
 
-export type CampaignResponse = PaginatedResponse<Campaign>;
 
 export interface Prospect {
   id: string;
@@ -59,7 +58,6 @@ export interface Prospect {
   };
 }
 
-export type ProspectResponse = PaginatedResponse<Prospect>;
 
 export interface Landingpage {
   id: string;
@@ -79,7 +77,6 @@ export interface Landingpage {
   sections: any[];
 }
 
-export type LandingpageResponse = PaginatedResponse<Landingpage>;
 
 export interface ProspectFilter {
   max_age?: number;
