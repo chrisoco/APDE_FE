@@ -1,4 +1,4 @@
-import type { ProspectResponse } from "~/lib/types";
+import type { Prospect } from "~/lib/types";
 import { prospectColumns } from "~/components/columns/prospect-columns";
 import { AdminViewLayout } from "~/components/ui/admin-view-layout";
 import { useAdminList } from "~/hooks/useAdminList";
@@ -8,7 +8,7 @@ export default function Prospects() {
     data: prospects,
     loading,
     error
-  } = useAdminList<ProspectResponse>({
+  } = useAdminList<Prospect>({
     endpoint: '/api/prospects',
     basePath: '/admin/prospects' // Not used for view-only
   });

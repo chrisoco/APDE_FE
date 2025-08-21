@@ -1,4 +1,4 @@
-import type { CampaignResponse } from "~/lib/types";
+import type { Campaign } from "~/lib/types";
 import { campaignColumns } from "~/components/columns/campaign-columns";
 import { AdminListLayout } from "~/components/ui/admin-list-layout";
 import { useAdminList } from "~/hooks/useAdminList";
@@ -15,7 +15,7 @@ export default function Campaign() {
     handleDelete,
     handleCreate,
     handleDeleteSuccess
-  } = useAdminList<CampaignResponse>({
+  } = useAdminList<Campaign>({
     endpoint: '/api/campaigns',
     basePath: '/admin/campaign'
   });

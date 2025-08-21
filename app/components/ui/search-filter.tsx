@@ -9,7 +9,7 @@ import { DatePicker } from "~/components/ui/date-picker"
 import { Badge } from "~/components/ui/badge"
 import { apiHelpers } from "~/lib/api"
 
-export interface SearchCriteriaResponse {
+interface SearchCriteriaResponse {
   [key: string]: string[] | { min: number | string; max: number | string } | undefined
 }
 

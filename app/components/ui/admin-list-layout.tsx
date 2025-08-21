@@ -3,13 +3,14 @@ import { DataTable } from './data-table'
 import { DeleteDialog } from './delete-dialog'
 import { Plus } from 'lucide-react'
 import type { ColumnDef } from '@tanstack/react-table'
+import type { PaginatedResponse } from '~/lib/types'
 
 interface AdminListLayoutProps<T> {
   title: string
   createButtonText: string
   entityType: string
   endpoint: string
-  data: T[]
+  data: PaginatedResponse<T> | null
   columns: ColumnDef<T>[]
   loading: boolean
   error: string | null

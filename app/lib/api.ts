@@ -2,7 +2,7 @@ import { getXsrfTokenFromCookie } from "./csrf";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
-export interface ApiOptions extends RequestInit {
+interface ApiOptions extends RequestInit {
   requiresAuth?: boolean;
   includeCSRF?: boolean;
   params?: Record<string, string | number | boolean>;
@@ -51,7 +51,7 @@ export async function api(endpoint: string, options: ApiOptions = {}): Promise<R
   return response;
 }
 
-export async function apiJson<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
+async function apiJson<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const response = await api(endpoint, options);
   
   if (!response.ok) {
@@ -62,7 +62,7 @@ export async function apiJson<T = any>(endpoint: string, options: ApiOptions = {
   return response.json();
 }
 
-export interface PaginationOptions {
+interface PaginationOptions {
   page?: number;
   per_page?: number;
 }
