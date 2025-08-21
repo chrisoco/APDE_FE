@@ -1,7 +1,5 @@
-"use client"
-
-import { type ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import type { ColumnDef } from "@tanstack/react-table"
+import { ArrowUpDown, MoreHorizontal, ExternalLink } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import {
@@ -12,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
-import type { Campaign } from "../../lib/types"
+import type { Campaign } from "~/lib/types"
 
 const truncateDescription = (desc: string, maxLength: number = 100) => {
   return desc.length > maxLength ? `${desc.substring(0, maxLength)}...` : desc;
@@ -150,7 +148,8 @@ export const campaignColumns = (
     },
   },
   {
-    accessorKey: "landingpage.title",
+    accessorFn: (row) => row.landingpage?.title || "No Landing Page",
+    id: "landingpage",
     header: ({ column }) => {
       return (
         <Button
@@ -173,6 +172,12 @@ export const campaignColumns = (
     enableHiding: false,
     cell: ({ row }) => {
       const campaign = row.original
+      
+      // Show button if campaign is active, has a landingpage, and end_date is null or > now
+      const shouldShowLandingPageButton = 
+        campaign.status === 'Active' && 
+        campaign.landingpage && 
+        (campaign.end_date === null || new Date(campaign.end_date) > new Date())
 
       return (
         <DropdownMenu>
@@ -192,6 +197,18 @@ export const campaignColumns = (
             }}
           >
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {shouldShowLandingPageButton && (
+              <>
+                <DropdownMenuItem
+                  onClick={() => window.open(`/cp/${campaign.slug}`, '_blank')}
+                  className="text-blue-600"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Open Landing Page
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(campaign.id.toString())}
             >

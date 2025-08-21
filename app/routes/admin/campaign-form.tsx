@@ -17,9 +17,10 @@ import { FormActions } from "~/components/ui/form-actions"
 
 import { apiHelpers } from "~/lib/api"
 import { ProspectFilter } from "~/components/prospect-filter"
-import type { ProspectFilter as ProspectFilterType } from "~/services/prospects"
-import { transformProspectFilterForAPI, transformProspectFilterFromAPI } from "~/utils/prospect-filter"
+import type { ProspectFilter as ProspectFilterType } from "~/lib/types"
+import { transformFilterForAPI, transformFilterFromAPI } from "~/utils/prospect-filter"
 import { useFormWithValidation } from "~/hooks/useFormWithValidation"
+import { CACHE_TAGS } from "~/lib/cache-manager"
 
 type Campaign = {
   id?: string
@@ -47,7 +48,7 @@ export default function CampaignForm() {
   const {
     formData,
     updateFormData,
-    errors,
+    // errors: _errors,
     loading,
     getFieldError,
     submitForm
@@ -64,6 +65,7 @@ export default function CampaignForm() {
     },
     endpoint: '/api/campaigns',
     redirectPath: '/admin/campaign',
+    cacheKey: CACHE_TAGS.CAMPAIGNS,
     onSuccess: () => navigate('/admin/campaign')
   })
 
@@ -86,7 +88,7 @@ export default function CampaignForm() {
       setFetchingLandingpages(true)
       const response = await apiHelpers.paginated(
         "/api/landingpages",
-        { page: 1, per_page: 100 },
+        { page: 1, per_page: 50 },
         { requiresAuth: true }
       )
       setLandingpages(response.data)
@@ -111,7 +113,7 @@ export default function CampaignForm() {
         status: campaign.status.toLowerCase(),
         slug: campaign.slug || '',
         landingpage_id: campaign.landingpage?.id || null,
-        prospect_filter: campaign.prospect_filter ? transformProspectFilterFromAPI(campaign.prospect_filter) : {}
+        prospect_filter: campaign.prospect_filter ? transformFilterFromAPI(campaign.prospect_filter) : {}
       })
     } catch (error) {
       console.error('Failed to fetch campaign:', error)
@@ -129,7 +131,7 @@ export default function CampaignForm() {
       start_date: formData.start_date ? `${formData.start_date}T00:00:00.000Z` : null,
       end_date: formData.end_date ? `${formData.end_date}T23:59:59.000Z` : null,
       prospect_filter: formData.prospect_filter && Object.keys(formData.prospect_filter).length > 0 
-        ? transformProspectFilterForAPI(formData.prospect_filter)
+        ? transformFilterForAPI(formData.prospect_filter)
         : undefined
     }
 

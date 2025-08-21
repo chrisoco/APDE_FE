@@ -1,4 +1,3 @@
-import type { ProspectFilter } from "~/services/prospects"
 import type { FilterValue } from "~/components/ui/search-filter"
 
 /**
@@ -79,6 +78,3 @@ export function transformFilterFromAPI(apiFilter: Record<string, any>): FilterVa
   return internalFilter
 }
 
-// Legacy functions for backward compatibility
-export const transformProspectFilterForAPI = transformFilterForAPI
-export const transformProspectFilterFromAPI = transformFilterFromAPI

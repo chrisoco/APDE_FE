@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import { Button } from './button'
 import { ArrowLeft, Loader2 } from 'lucide-react'

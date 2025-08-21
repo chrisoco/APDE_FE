@@ -2,7 +2,7 @@ import { getXsrfTokenFromCookie } from "./csrf";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
-export interface ApiOptions extends RequestInit {
+interface ApiOptions extends RequestInit {
   requiresAuth?: boolean;
   includeCSRF?: boolean;
   params?: Record<string, string | number | boolean>;
@@ -51,7 +51,7 @@ export async function api(endpoint: string, options: ApiOptions = {}): Promise<R
   return response;
 }
 
-export async function apiJson<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
+async function apiJson<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const response = await api(endpoint, options);
   
   if (!response.ok) {
@@ -62,7 +62,7 @@ export async function apiJson<T = any>(endpoint: string, options: ApiOptions = {
   return response.json();
 }
 
-export interface PaginationOptions {
+interface PaginationOptions {
   page?: number;
   per_page?: number;
 }
@@ -88,13 +88,15 @@ export const apiHelpers = {
   delete: <T = any>(endpoint: string, options?: Omit<ApiOptions, 'method'>) =>
     apiJson<T>(endpoint, { ...options, method: 'DELETE' }),
 
-  paginated: <T = any>(
+  paginated: async <T = any>(
     endpoint: string, 
     pagination: PaginationOptions = {}, 
     options?: Omit<ApiOptions, 'method'>
-  ) => {
+  ): Promise<T> => {
     const { page = 1, per_page = 10 } = pagination;
-    return apiJson<T>(endpoint, {
+    
+    // First request to get initial data and total count
+    const firstResponse = await apiJson<T>(endpoint, {
       ...options,
       method: 'GET',
       params: {
@@ -103,5 +105,61 @@ export const apiHelpers = {
         ...options?.params
       }
     });
+
+    // Check if this is a paginated response with meta information
+    if (
+      firstResponse && 
+      typeof firstResponse === 'object' && 
+      'meta' in firstResponse && 
+      'data' in firstResponse
+    ) {
+      const paginatedResponse = firstResponse as any;
+      const { total, per_page: actualPerPage, last_page } = paginatedResponse.meta;
+      
+      // If we have more data than fits on one page, fetch all pages
+      if (total > actualPerPage && last_page > 1) {
+        const allData = [...paginatedResponse.data];
+        const promises = [];
+        
+        // Create promises for all remaining pages
+        for (let currentPage = 2; currentPage <= last_page; currentPage++) {
+          promises.push(
+            apiJson<T>(endpoint, {
+              ...options,
+              method: 'GET',
+              params: {
+                page: currentPage,
+                per_page: actualPerPage,
+                ...options?.params
+              }
+            })
+          );
+        }
+        
+        // Execute all requests in parallel
+        const remainingResponses = await Promise.all(promises);
+        
+        // Combine all data
+        remainingResponses.forEach(response => {
+          if (response && typeof response === 'object' && 'data' in response) {
+            allData.push(...(response as any).data);
+          }
+        });
+        
+        // Return the combined response with all data
+        return {
+          ...paginatedResponse,
+          data: allData,
+          meta: {
+            ...paginatedResponse.meta,
+            current_page: 1,
+            per_page: allData.length // Update per_page to reflect actual count
+          }
+        } as T;
+      }
+    }
+    
+    // Return original response if not paginated or only one page
+    return firstResponse;
   },
 };

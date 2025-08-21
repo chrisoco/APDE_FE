@@ -1,31 +1,11 @@
-export interface Campaign {
-  id: string;
-  title: string;
-  description: string;
-  start_date: string;
-  end_date: string;
-  status: string;
-  prospect_filter: {
-    max_age?: number;
-    gender?: string;
-    source?: string;
-  };
-  slug: string;
-  landingpage_id: string | null;
-  landingpage?: {
-    id: string;
-    title: string;
-  } | null;
-}
-
-export interface PaginationMeta {
+interface PaginationMeta {
   current_page: number;
   last_page: number;
   per_page: number;
   total: number;
 }
 
-export interface PaginationLinks {
+interface PaginationLinks {
   first?: string;
   last?: string;
   prev?: string;
@@ -38,7 +18,22 @@ export interface PaginatedResponse<T> {
   links: PaginationLinks;
 }
 
-export type CampaignResponse = PaginatedResponse<Campaign>;
+export interface Campaign {
+  id: string;
+  title: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  status: string;
+  prospect_filter: ProspectFilter;
+  slug: string;
+  landingpage_id: string | null;
+  landingpage?: {
+    id: string;
+    title: string;
+  } | null;
+}
+
 
 export interface Prospect {
   id: string;
@@ -63,14 +58,6 @@ export interface Prospect {
   };
 }
 
-export type ProspectResponse = PaginatedResponse<Prospect>;
-
-export interface LandingpageSection {
-  text: string;
-  image_url: string;
-  cta_text: string;
-  cta_url: string;
-}
 
 export interface Landingpage {
   id: string;
@@ -82,34 +69,21 @@ export interface Landingpage {
     end_date: string;
     status: string;
     slug: string;
-    prospect_filter: {
-      max_age?: number;
-      min_age?: number;
-      gender?: string;
-      source?: string;
-    };
+    prospect_filter: ProspectFilter;
   }[];
   title: string;
   headline: string;
   subline: string;
-  sections: LandingpageSection[];
+  sections: any[];
 }
 
-export type LandingpageResponse = PaginatedResponse<Landingpage>;
 
-export interface PublicLandingpageSection {
-  text: string;
-  image_url: string;
-  cta_text: string;
-  cta_url: string;
-}
-
-export interface PublicLandingpage {
-  id: string;
-  title: string;
-  headline: string;
-  subline: string;
-  sections: PublicLandingpageSection[];
+export interface ProspectFilter {
+  max_age?: number;
+  min_age?: number;
+  gender?: string;
+  source?: string;
+  [key: string]: any;
 }
 
 export interface PublicCampaignData {
@@ -117,9 +91,8 @@ export interface PublicCampaignData {
   title: string;
   slug: string;
   description: string;
-  landingpage: PublicLandingpage;
+  landingpage: any;
 }
-
 export interface PublicCampaignResponse {
   data: PublicCampaignData;
 }

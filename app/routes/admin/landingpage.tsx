@@ -1,24 +1,39 @@
-import type { Route } from "../+types/admin";
-import type { LandingpageResponse } from "../../lib/types";
-import { landingpageColumns } from "../../components/columns/landingpage-columns";
-import { AdminListLayout } from "../../components/ui/admin-list-layout";
-import { useAdminList } from "../../hooks/useAdminList";
+import { useLoaderData } from "react-router";
+import type { Landingpage, PaginatedResponse } from "~/lib/types";
+import { landingpageColumns } from "~/components/columns/landingpage-columns";
+import { AdminListLayout } from "~/components/ui/admin-list-layout";
+import { useAdminActions } from "~/hooks/useAdminActions";
+import { apiHelpers } from "~/lib/api";
+import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 
-export default function Landingpage(_: Route.ComponentProps) {
+export async function clientLoader(): Promise<PaginatedResponse<Landingpage>> {
+  return withCache(
+    () => apiHelpers.paginated<PaginatedResponse<Landingpage>>(
+      '/api/landingpages',
+      { page: 1, per_page: 50 },
+      { requiresAuth: true }
+    ),
+    CACHE_TAGS.LANDINGPAGES,
+    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.LANDINGPAGES] } // 2 minutes TTL
+  );
+}
+
+export default function Landingpage() {
+  const landingpages = useLoaderData<typeof clientLoader>();
+  
   const {
-    data: landingpages,
-    loading,
-    error,
     deleteOpen,
     setDeleteOpen,
     itemToDelete,
+    isDeleting,
     handleEdit,
     handleDelete,
     handleCreate,
-    handleDeleteSuccess
-  } = useAdminList<LandingpageResponse>({
+    handleDeleteConfirm
+  } = useAdminActions({
     endpoint: '/api/landingpages',
-    basePath: '/admin/landingpage'
+    basePath: '/admin/landingpage',
+    cacheKey: CACHE_TAGS.LANDINGPAGES
   });
 
   // Create columns with proper handler injection
@@ -32,13 +47,14 @@ export default function Landingpage(_: Route.ComponentProps) {
       endpoint="/api/landingpages"
       data={landingpages}
       columns={columns}
-      loading={loading}
-      error={error}
+      loading={false}
+      error={null}
       deleteOpen={deleteOpen}
       setDeleteOpen={setDeleteOpen}
       itemToDelete={itemToDelete}
+      isDeleting={isDeleting}
       onCreate={handleCreate}
-      onDeleteSuccess={handleDeleteSuccess}
+      onDeleteConfirm={handleDeleteConfirm}
     />
   );
 }

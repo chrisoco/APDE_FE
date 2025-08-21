@@ -1,5 +1,5 @@
-import { Form, useActionData, useNavigation } from "react-router"
 import { useState } from "react"
+import { Form, useActionData, useNavigation, Link } from "react-router"
 import { cn } from "~/lib/utils"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent } from "~/components/ui/card"
@@ -64,13 +64,22 @@ export function LoginForm({
                   {actionData.error}
                 </div>
               )}
-              <Button 
-                type="submit" 
-                className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 font-semibold shadow-sm hover:shadow-md border border-blue-200 hover:border-blue-300 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" 
-                disabled={busy}
-              >
-                {busy ? "Signing in..." : "Login"}
-              </Button>
+              <div className="space-y-2">
+                <Button 
+                  type="submit" 
+                  className="w-full bg-blue-50 hover:bg-blue-100 text-blue-700 hover:text-blue-800 font-semibold shadow-sm hover:shadow-md border border-blue-200 hover:border-blue-300 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" 
+                  disabled={busy}
+                >
+                  {busy ? "Signing in..." : "Login"}
+                </Button>
+                <Button 
+                  asChild
+                  variant="outline"
+                  className="w-full"
+                >
+                  <Link to="/">← Back to Home</Link>
+                </Button>
+              </div>
               <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   Or continue with

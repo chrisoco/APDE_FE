@@ -1,24 +1,26 @@
-import { ReactNode } from 'react'
 import { Button } from './button'
 import { DataTable } from './data-table'
 import { DeleteDialog } from './delete-dialog'
 import { Plus } from 'lucide-react'
 import type { ColumnDef } from '@tanstack/react-table'
+import type { PaginatedResponse } from '~/lib/types'
 
 interface AdminListLayoutProps<T> {
   title: string
   createButtonText: string
   entityType: string
   endpoint: string
-  data: any
+  data: PaginatedResponse<T> | null
   columns: ColumnDef<T>[]
   loading: boolean
   error: string | null
   deleteOpen: boolean
   setDeleteOpen: (open: boolean) => void
   itemToDelete: { id: string; title: string } | null
+  isDeleting?: boolean
   onCreate: () => void
-  onDeleteSuccess: () => void
+  onDeleteSuccess?: () => void
+  onDeleteConfirm?: () => void
 }
 
 export function AdminListLayout<T>({
@@ -33,8 +35,10 @@ export function AdminListLayout<T>({
   deleteOpen,
   setDeleteOpen,
   itemToDelete,
+  isDeleting = false,
   onCreate,
-  onDeleteSuccess
+  onDeleteSuccess,
+  onDeleteConfirm
 }: AdminListLayoutProps<T>) {
   if (loading) {
     return (
@@ -80,7 +84,9 @@ export function AdminListLayout<T>({
         entityName={itemToDelete?.title || ''}
         entityId={itemToDelete?.id || null}
         endpoint={endpoint}
+        isDeleting={isDeleting}
         onSuccess={onDeleteSuccess}
+        onConfirm={onDeleteConfirm}
       />
     </div>
   )

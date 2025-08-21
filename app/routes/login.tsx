@@ -1,9 +1,32 @@
 import { redirect } from "react-router";
-import type { Route } from "./+types/admin/login";
-import { api, apiHelpers } from "../lib/api";
-import { LoginForm } from "../components/login-form";
+import type { ClientActionFunctionArgs } from "react-router";
+import { api, apiHelpers } from "~/lib/api";
+import { LoginForm } from "~/components/login-form";
+import { hasAuthCookies } from "~/lib/csrf";
 
-export async function clientAction({ request }: Route.ClientActionArgs) {
+export async function clientLoader() {
+    if (hasAuthCookies()) {
+        try {
+            const response = await api("/api/user", { method: "GET" });
+            if (response.ok) {
+                // User is authenticated - redirect to admin
+                throw redirect("/admin");
+            }
+            // If response is not ok (401, 403, etc.), user is not authenticated
+            // Just fall through to return null (stay on login page)
+        } catch (error) {
+            // Check if this is a redirect response (which we want to let through)
+            if (error instanceof Response && error.status !== 401) {
+                throw error;
+            }
+            // If API call fails, user is not authenticated - stay on login page
+        }
+    }
+  
+  return null;
+}
+
+export async function clientAction({ request }: ClientActionFunctionArgs) {
   const fd = await request.formData();
   const email = String(fd.get("email") || "");
   const password = String(fd.get("password") || "");
@@ -21,7 +44,10 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         const errorMessage = error.message.split("API Error: ")[1];
         const data = JSON.parse(errorMessage.split(" ").slice(1).join(" "));
         if (data?.message) message = data.message;
-      } catch {}
+      } catch (parseError) {
+        // Ignore JSON parsing errors
+        console.debug('Failed to parse error message as JSON:', parseError);
+      }
     }
     return { error: message };
   }
