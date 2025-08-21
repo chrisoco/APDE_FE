@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { RangeSlider } from "~/components/ui/range-slider"
 import { MultiSelect } from "~/components/ui/multi-select"
-import { Combobox } from "~/components/ui/combobox"
 import { DatePicker } from "~/components/ui/date-picker"
 import { Badge } from "~/components/ui/badge"
 import { apiHelpers } from "~/lib/api"
@@ -277,7 +276,7 @@ export function SearchFilter({
     )
   }
 
-  const renderDateRangeField = (key: string, range: { min: string; max: string }) => {
+  const renderDateRangeField = (key: string, _range: { min: string; max: string }) => {
     const minKey = `min_${key.replace('.', '_')}`
     const maxKey = `max_${key.replace('.', '_')}`
 
@@ -396,9 +395,11 @@ export function SearchFilter({
         <div className="flex items-center justify-between">
           <CardTitle>{title}</CardTitle>
           {showCount && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 h-6">
               {countLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <div className="flex items-center justify-center h-6">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </div>
               ) : filterCount !== null ? (
                 <Badge variant="secondary">
                   {filterCount} matches

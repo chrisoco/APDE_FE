@@ -1,4 +1,3 @@
-import { ReactNode } from 'react'
 import { Button } from './button'
 import { DataTable } from './data-table'
 import { DeleteDialog } from './delete-dialog'
@@ -10,7 +9,7 @@ interface AdminListLayoutProps<T> {
   createButtonText: string
   entityType: string
   endpoint: string
-  data: any
+  data: T[]
   columns: ColumnDef<T>[]
   loading: boolean
   error: string | null

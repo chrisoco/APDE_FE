@@ -1,10 +1,9 @@
-import type { Route } from "../+types/admin";
-import type { ProspectResponse } from "../../lib/types";
-import { prospectColumns } from "../../components/columns/prospect-columns";
-import { AdminViewLayout } from "../../components/ui/admin-view-layout";
-import { useAdminList } from "../../hooks/useAdminList";
+import type { ProspectResponse } from "~/lib/types";
+import { prospectColumns } from "~/components/columns/prospect-columns";
+import { AdminViewLayout } from "~/components/ui/admin-view-layout";
+import { useAdminList } from "~/hooks/useAdminList";
 
-export default function Prospects(_: Route.ComponentProps) {
+export default function Prospects() {
   const {
     data: prospects,
     loading,

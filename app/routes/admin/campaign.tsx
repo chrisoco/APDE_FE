@@ -1,10 +1,9 @@
-import type { Route } from "../+types/admin";
-import type { CampaignResponse } from "../../lib/types";
-import { campaignColumns } from "../../components/columns/campaign-columns";
-import { AdminListLayout } from "../../components/ui/admin-list-layout";
-import { useAdminList } from "../../hooks/useAdminList";
+import type { CampaignResponse } from "~/lib/types";
+import { campaignColumns } from "~/components/columns/campaign-columns";
+import { AdminListLayout } from "~/components/ui/admin-list-layout";
+import { useAdminList } from "~/hooks/useAdminList";
 
-export default function Campaign(_: Route.ComponentProps) {
+export default function Campaign() {
   const {
     data: campaigns,
     loading,

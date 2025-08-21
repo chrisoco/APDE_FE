@@ -1,4 +1,3 @@
-import type { ProspectFilter } from "~/services/prospects"
 import type { FilterValue } from "~/components/ui/search-filter"
 
 /**

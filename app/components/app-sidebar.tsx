@@ -1,25 +1,17 @@
 import * as React from "react"
 import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconMail,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
+  BarChart3,
+  LayoutDashboard,
+  HelpCircle,
+  Square,
+  List,
+  Mail,
+  Search,
+  Settings,
+  Users,
+} from "lucide-react"
 import { useRouteLoaderData } from "react-router"
 
-import { NavDocuments } from "~/components/nav-documents"
 import { NavMain } from "~/components/nav-main"
 import { NavSecondary } from "~/components/nav-secondary"
 import { NavUser } from "~/components/nav-user"
@@ -43,109 +35,44 @@ const data = {
     {
       title: "Dashboard",
       url: "/admin",
-      icon: IconDashboard,
+      icon: LayoutDashboard,
     },
     {
       title: "Campaign Outbox",
       url: "/admin/campaign-outbox",
-      icon: IconMail,
+      icon: Mail,
     },
     {
       title: "Prospects",
       url: "/admin/prospects",
-      icon: IconUsers,
+      icon: Users,
     },
     {
       title: "Campaigns",
       url: "/admin/campaign",
-      icon: IconListDetails,
+      icon: List,
     },
     {
       title: "Landing Pages",
       url: "/admin/landingpage",
-      icon: IconChartBar,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
+      icon: BarChart3,
     },
   ],
   navSecondary: [
     {
       title: "Settings",
       url: "#",
-      icon: IconSettings,
+      icon: Settings,
     },
     {
       title: "Get Help",
       url: "#",
-      icon: IconHelp,
+      icon: HelpCircle,
     },
     {
       title: "Search",
       url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
+      icon: Search,
     },
   ],
 }
@@ -163,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="/admin">
-                <IconInnerShadowTop className="!size-5" />
+                <Square className="!size-5" />
                 <span className="text-base font-semibold">APDE FE</span>
               </a>
             </SidebarMenuButton>

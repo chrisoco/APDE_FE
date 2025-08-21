@@ -1,7 +1,5 @@
-"use client"
-
 import { SearchFilter, type FilterValue } from "~/components/ui/search-filter"
-import type { ProspectFilter } from "~/services/prospects"
+import type { ProspectFilter } from "~/lib/types"
 
 interface ProspectFilterProps {
   value?: ProspectFilter
