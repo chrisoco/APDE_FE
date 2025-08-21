@@ -85,7 +85,7 @@ export function MultiSelect({
                     key={option.value}
                     variant="secondary"
                     className="text-xs"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent) => {
                       e.preventDefault()
                       e.stopPropagation()
                       handleRemove(option.value)

@@ -1,9 +1,10 @@
 import { DataTable } from './data-table'
 import type { ColumnDef } from '@tanstack/react-table'
+import type { PaginatedResponse } from '~/lib/types'
 
 interface AdminViewLayoutProps<T> {
   title: string
-  data: T[]
+  data: PaginatedResponse<T> | null
   columns: ColumnDef<T>[]
   loading: boolean
   error: string | null

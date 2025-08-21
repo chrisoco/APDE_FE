@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { apiHelpers } from '~/lib/api'
+import type { PaginatedResponse } from '~/lib/types'
 
 interface UseAdminListOptions {
   endpoint: string
@@ -14,7 +15,7 @@ interface DeleteItem {
 
 export function useAdminList<T>({ endpoint, basePath }: UseAdminListOptions) {
   const navigate = useNavigate()
-  const [data, setData] = useState<T | null>(null)
+  const [data, setData] = useState<PaginatedResponse<T> | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -23,7 +24,7 @@ export function useAdminList<T>({ endpoint, basePath }: UseAdminListOptions) {
   const fetchData = async () => {
     try {
       setLoading(true)
-      const response = await apiHelpers.paginated<T>(
+      const response = await apiHelpers.paginated<PaginatedResponse<T>>(
         endpoint,
         { page: 1, per_page: 100 },
         { requiresAuth: true }

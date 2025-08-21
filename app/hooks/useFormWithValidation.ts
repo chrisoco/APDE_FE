@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { apiHelpers } from '~/lib/api'
 
-export type ValidationErrors = {
+type ValidationErrors = {
   [key: string]: string[]
 }
 
-export interface UseFormWithValidationOptions<T> {
+interface UseFormWithValidationOptions<T> {
   initialData: T
   endpoint: string
   redirectPath: string
@@ -15,7 +15,7 @@ export interface UseFormWithValidationOptions<T> {
 export function useFormWithValidation<T>({
   initialData,
   endpoint,
-  _redirectPath,
+  redirectPath: _redirectPath,
   onSuccess
 }: UseFormWithValidationOptions<T>) {
   const [formData, setFormData] = useState<T>(initialData)

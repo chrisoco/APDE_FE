@@ -1,4 +1,4 @@
-import type { LandingpageResponse } from "~/lib/types";
+import type { Landingpage } from "~/lib/types";
 import { landingpageColumns } from "~/components/columns/landingpage-columns";
 import { AdminListLayout } from "~/components/ui/admin-list-layout";
 import { useAdminList } from "~/hooks/useAdminList";
@@ -15,7 +15,7 @@ export default function Landingpage() {
     handleDelete,
     handleCreate,
     handleDeleteSuccess
-  } = useAdminList<LandingpageResponse>({
+  } = useAdminList<Landingpage>({
     endpoint: '/api/landingpages',
     basePath: '/admin/landingpage'
   });

@@ -65,8 +65,8 @@ export default function CampaignOutbox() {
         { requiresAuth: true }
       );
       setSentStats(response);
-    } catch {
-      console.error('Failed to load sent email stats:', err);
+    } catch (error) {
+      console.error('Failed to load sent email stats:', error);
       setSentStats(null); // Only clear on error
     } finally {
       setLoadingStats(false);
@@ -97,8 +97,8 @@ export default function CampaignOutbox() {
       if (selectedCampaignId) {
         loadSentStats(selectedCampaignId);
       }
-    } catch {
-      setError(err instanceof Error ? err.message : 'Failed to send emails');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to send emails');
     } finally {
       setLoading(false);
     }

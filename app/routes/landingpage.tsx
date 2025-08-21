@@ -111,7 +111,7 @@ export default function CampaignLandingPage() {
       {/* Content Sections */}
       <div className="relative py-24">
         <div className="container mx-auto px-4">
-          {landingpage.sections.map((section, index) => (
+          {landingpage.sections.map((section: any, index: number) => (
             <div key={index} className="mb-32 last:mb-0">
               {index === 0 ? (
                 /* Hero Content Section */
@@ -132,7 +132,7 @@ export default function CampaignLandingPage() {
                   <div className="max-w-4xl mx-auto">
                     {section.text && (
                       <div className="prose prose-xl prose-slate mx-auto">
-                        {section.text.split('\n\n').map((paragraph, pIndex) => (
+                        {section.text.split('\n\n').map((paragraph: string, pIndex: number) => (
                           <p key={pIndex} className="mb-6 text-slate-700 leading-relaxed text-lg font-light">
                             {paragraph}
                           </p>
@@ -176,7 +176,7 @@ export default function CampaignLandingPage() {
                   )}
                   <div className={`${index % 2 === 1 ? 'lg:order-1 lg:text-right' : 'lg:order-2'} space-y-8 text-center ${index % 2 === 1 ? 'lg:text-right' : 'lg:text-left'}`}>
                     <div className="space-y-6">
-                      {section.text.split('\n\n').map((paragraph, pIndex) => (
+                      {section.text.split('\n\n').map((paragraph: string, pIndex: number) => (
                         <p key={pIndex} className="text-lg text-slate-700 leading-relaxed font-light">
                           {paragraph}
                         </p>
