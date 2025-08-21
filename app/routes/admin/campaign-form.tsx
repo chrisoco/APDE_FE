@@ -20,6 +20,7 @@ import { ProspectFilter } from "~/components/prospect-filter"
 import type { ProspectFilter as ProspectFilterType } from "~/lib/types"
 import { transformFilterForAPI, transformFilterFromAPI } from "~/utils/prospect-filter"
 import { useFormWithValidation } from "~/hooks/useFormWithValidation"
+import { CACHE_TAGS } from "~/lib/cache-manager"
 
 type Campaign = {
   id?: string
@@ -64,6 +65,7 @@ export default function CampaignForm() {
     },
     endpoint: '/api/campaigns',
     redirectPath: '/admin/campaign',
+    cacheKey: CACHE_TAGS.CAMPAIGNS,
     onSuccess: () => navigate('/admin/campaign')
   })
 
@@ -86,7 +88,7 @@ export default function CampaignForm() {
       setFetchingLandingpages(true)
       const response = await apiHelpers.paginated(
         "/api/landingpages",
-        { page: 1, per_page: 100 },
+        { page: 1, per_page: 50 },
         { requiresAuth: true }
       )
       setLandingpages(response.data)

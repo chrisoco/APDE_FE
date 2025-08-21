@@ -17,7 +17,9 @@ interface DeleteDialogProps {
   entityName: string
   entityId: string | null
   endpoint: string
-  onSuccess: () => void
+  isDeleting?: boolean
+  onSuccess?: () => void
+  onConfirm?: () => void
 }
 
 export function DeleteDialog({ 
@@ -27,20 +29,29 @@ export function DeleteDialog({
   entityName,
   entityId, 
   endpoint,
-  onSuccess 
+  isDeleting = false,
+  onSuccess,
+  onConfirm 
 }: DeleteDialogProps) {
   const [loading, setLoading] = useState(false)
 
   const handleDelete = async () => {
     if (!entityId) return
 
+    // If onConfirm is provided, use that (new pattern)
+    if (onConfirm) {
+      onConfirm()
+      return
+    }
+
+    // Legacy pattern for direct API calls
     setLoading(true)
     try {
       await apiHelpers.delete(`${endpoint}/${entityId}`, { 
         requiresAuth: true, 
         includeCSRF: true 
       })
-      onSuccess()
+      onSuccess?.()
       onOpenChange(false)
     } catch (error) {
       console.error(`Failed to delete ${entityType.toLowerCase()}:`, error)
@@ -48,6 +59,8 @@ export function DeleteDialog({
       setLoading(false)
     }
   }
+
+  const isLoading = isDeleting || loading
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -63,7 +76,7 @@ export function DeleteDialog({
             type="button" 
             variant="outline" 
             onClick={() => onOpenChange(false)}
-            disabled={loading}
+            disabled={isLoading}
           >
             Cancel
           </Button>
@@ -71,9 +84,9 @@ export function DeleteDialog({
             type="button" 
             variant="destructive" 
             onClick={handleDelete}
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading ? 'Deleting...' : `Delete ${entityType}`}
+            {isLoading ? 'Deleting...' : `Delete ${entityType}`}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,10 +1,11 @@
 import * as React from "react";
-import { Outlet, redirect, useLoaderData } from "react-router";
+import { Outlet, redirect, useLoaderData, useNavigation } from "react-router";
 import type { Route } from "./+types/_layout";
 import { apiHelpers } from "~/lib/api";
 import { clearAuthCookies } from "~/lib/csrf";
 import { AppSidebar } from "~/components/app-sidebar";
 import { SiteHeader } from "~/components/site-header";
+import { LoadingBoundary } from "~/components/ui/loading-boundary";
 import {
   SidebarInset,
   SidebarProvider,
@@ -45,6 +46,9 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export default function AdminLayout() {
   useLoaderData<typeof clientLoader>();
+  const navigation = useNavigation();
+  
+  const isNavigating = navigation.state === "loading";
 
   return (
     <SidebarProvider
@@ -61,8 +65,18 @@ export default function AdminLayout() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <main className="px-4 lg:px-6">
-                <Outlet />
+              <main className="px-4 lg:px-6 relative">
+                {isNavigating && (
+                  <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex items-start justify-center pt-8">
+                    <div className="flex items-center space-x-2 bg-background border rounded-md px-4 py-2 shadow-sm">
+                      <div className="w-4 h-4 bg-primary rounded-full animate-pulse"></div>
+                      <span className="text-sm text-muted-foreground">Loading...</span>
+                    </div>
+                  </div>
+                )}
+                <LoadingBoundary>
+                  <Outlet />
+                </LoadingBoundary>
               </main>
             </div>
           </div>

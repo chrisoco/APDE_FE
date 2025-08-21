@@ -9,6 +9,7 @@ import { FormActions } from "~/components/ui/form-actions"
 
 import { apiHelpers } from "~/lib/api"
 import { useFormWithValidation } from "~/hooks/useFormWithValidation"
+import { CACHE_TAGS } from "~/lib/cache-manager"
 
 type LandingpageSection = {
   text: string
@@ -48,6 +49,7 @@ export default function LandingpageForm() {
     },
     endpoint: '/api/landingpages',
     redirectPath: '/admin/landingpage',
+    cacheKey: CACHE_TAGS.LANDINGPAGES,
     onSuccess: () => navigate('/admin/landingpage')
   })
 
