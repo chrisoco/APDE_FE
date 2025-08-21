@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import type { Campaign } from "~/lib/types";
+import { useLoaderData } from "react-router";
+import type { Campaign, PaginatedResponse } from "~/lib/types";
 import { apiHelpers } from "~/lib/api";
+import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Combobox } from "~/components/ui/combobox";
@@ -24,37 +26,28 @@ interface SentEmailsStats {
   total_prospects: number;
 }
 
+export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
+  return withCache(
+    () => apiHelpers.paginated<PaginatedResponse<Campaign>>(
+      '/api/campaigns',
+      { page: 1, per_page: 50 },
+      { requiresAuth: true }
+    ),
+    CACHE_TAGS.CAMPAIGNS,
+    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.CAMPAIGNS] } // 2 minutes TTL
+  );
+}
+
 export default function CampaignOutbox() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const campaignsResponse = useLoaderData<typeof clientLoader>();
+  const allCampaigns = campaignsResponse.data || [];
+  const campaigns = allCampaigns.filter(campaign => campaign.status === 'Active');
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [forceOption, setForceOption] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
-  const [campaignsLoaded, setCampaignsLoaded] = useState(false);
   const [sentStats, setSentStats] = useState<SentEmailsStats | null>(null);
   const [loadingStats, setLoadingStats] = useState(false);
-
-  // Load campaigns on component mount
-  useEffect(() => {
-    loadCampaigns();
-  }, []);
-
-  const loadCampaigns = async () => {
-    if (campaignsLoaded) return;
-    
-    setLoadingCampaigns(true);
-    try {
-      const response = await apiHelpers.get('/api/campaigns');
-      const activeCampaigns = (response.data || []).filter((campaign: Campaign) => campaign.status === 'Active');
-      setCampaigns(activeCampaigns);
-      setCampaignsLoaded(true);
-    } catch {
-      setError('Failed to load campaigns');
-    } finally {
-      setLoadingCampaigns(false);
-    }
-  };
 
   const loadSentStats = async (campaignId: string) => {
     setLoadingStats(true);
@@ -143,13 +136,9 @@ export default function CampaignOutbox() {
                   // Clear stats when no campaign is selected
                   setSentStats(null);
                 }
-                if (!campaignsLoaded) {
-                  loadCampaigns();
-                }
               }}
-              placeholder={loadingCampaigns ? "Loading active campaigns..." : "Search active campaigns..."}
+              placeholder="Search active campaigns..."
               emptyMessage="No active campaigns found."
-              disabled={loadingCampaigns}
             />
           </div>
 
@@ -233,7 +222,7 @@ export default function CampaignOutbox() {
 
           <Button 
             onClick={handleSendEmails} 
-            disabled={loading || !selectedCampaignId || loadingCampaigns}
+            disabled={loading || !selectedCampaignId}
             className="w-full"
           >
             {loading ? "Sending..." : "Send Emails"}

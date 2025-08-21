@@ -17,8 +17,10 @@ interface AdminListLayoutProps<T> {
   deleteOpen: boolean
   setDeleteOpen: (open: boolean) => void
   itemToDelete: { id: string; title: string } | null
+  isDeleting?: boolean
   onCreate: () => void
-  onDeleteSuccess: () => void
+  onDeleteSuccess?: () => void
+  onDeleteConfirm?: () => void
 }
 
 export function AdminListLayout<T>({
@@ -33,8 +35,10 @@ export function AdminListLayout<T>({
   deleteOpen,
   setDeleteOpen,
   itemToDelete,
+  isDeleting = false,
   onCreate,
-  onDeleteSuccess
+  onDeleteSuccess,
+  onDeleteConfirm
 }: AdminListLayoutProps<T>) {
   if (loading) {
     return (
@@ -80,7 +84,9 @@ export function AdminListLayout<T>({
         entityName={itemToDelete?.title || ''}
         entityId={itemToDelete?.id || null}
         endpoint={endpoint}
+        isDeleting={isDeleting}
         onSuccess={onDeleteSuccess}
+        onConfirm={onDeleteConfirm}
       />
     </div>
   )

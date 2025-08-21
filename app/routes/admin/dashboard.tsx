@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import type { Campaign } from "~/lib/types";
+import { useLoaderData } from "react-router";
+import type { Campaign, PaginatedResponse } from "~/lib/types";
 import { apiHelpers } from "~/lib/api";
+import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Combobox } from "~/components/ui/combobox";
 import { Label } from "~/components/ui/label";
@@ -49,34 +51,25 @@ interface CampaignAnalytics {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
+export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
+  return withCache(
+    () => apiHelpers.paginated<PaginatedResponse<Campaign>>(
+      '/api/campaigns',
+      { page: 1, per_page: 50 },
+      { requiresAuth: true }
+    ),
+    CACHE_TAGS.CAMPAIGNS,
+    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.CAMPAIGNS] } // 2 minutes TTL
+  );
+}
+
 export default function AdminIndex() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const campaignsResponse = useLoaderData<typeof clientLoader>();
+  const campaigns = campaignsResponse.data || [];
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
   const [loading, setLoading] = useState(false);
-  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
-  const [campaignsLoaded, setCampaignsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Load campaigns on component mount
-  useEffect(() => {
-    loadCampaigns();
-  }, []);
-
-  const loadCampaigns = async () => {
-    if (campaignsLoaded) return;
-    
-    setLoadingCampaigns(true);
-    try {
-      const response = await apiHelpers.get('/api/campaigns');
-      setCampaigns(response.data || []);
-      setCampaignsLoaded(true);
-    } catch {
-      setError('Failed to load campaigns');
-    } finally {
-      setLoadingCampaigns(false);
-    }
-  };
 
   const loadAnalytics = async (campaignId: string) => {
     setLoading(true);
@@ -134,13 +127,9 @@ export default function AdminIndex() {
                 if (value) {
                   loadAnalytics(value);
                 }
-                if (!campaignsLoaded) {
-                  loadCampaigns();
-                }
               }}
-              placeholder={loadingCampaigns ? "Loading campaigns..." : "Search campaigns..."}
+              placeholder="Search campaigns..."
               emptyMessage="No campaigns found."
-              disabled={loadingCampaigns}
             />
           </div>
 
