@@ -5,7 +5,7 @@ import {
   Bell,
   User,
 } from "lucide-react"
-import { Form } from "react-router"
+import { useFetcher } from "react-router"
 
 import {
   Avatar,
@@ -38,6 +38,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const fetcher = useFetcher()
 
   return (
     <SidebarMenu>
@@ -97,15 +98,21 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <Form method="post">
-              <input type="hidden" name="intent" value="logout" />
-              <DropdownMenuItem asChild>
-                <button type="submit" className="w-full">
-                  <LogOut />
-                  Log out
-                </button>
-              </DropdownMenuItem>
-            </Form>
+            <DropdownMenuItem asChild>
+              <button 
+                type="button" 
+                className="w-full"
+                onClick={() => {
+                  fetcher.submit(
+                    { intent: "logout" },
+                    { method: "post", action: "/admin" }
+                  )
+                }}
+              >
+                <LogOut />
+                Log out
+              </button>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
