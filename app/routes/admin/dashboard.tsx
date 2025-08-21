@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLoaderData } from "react-router";
 import type { Campaign, PaginatedResponse } from "~/lib/types";
 import { apiHelpers } from "~/lib/api";

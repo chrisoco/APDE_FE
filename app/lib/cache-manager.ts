@@ -107,11 +107,12 @@ export function withCache<T>(
   cacheKey: string,
   options: CacheOptions = {}
 ): Promise<T> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // Try to get from cache first
-      const cached = cacheManager.get<T>(cacheKey);
-      if (cached) {
+  return new Promise((resolve, reject) => {
+    const executeAsync = async () => {
+      try {
+        // Try to get from cache first
+        const cached = cacheManager.get<T>(cacheKey);
+        if (cached) {
         resolve(cached);
         return;
       }
@@ -123,8 +124,11 @@ export function withCache<T>(
       cacheManager.set(cacheKey, data, options);
       
       resolve(data);
-    } catch (error) {
-      reject(error);
-    }
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    executeAsync();
   });
 }

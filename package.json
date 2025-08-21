@@ -8,7 +8,9 @@
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "knip": "knip",
+    "fix": "npm run typecheck && npm run lint:fix && npm run knip"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.10",
