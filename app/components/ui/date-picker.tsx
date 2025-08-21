@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, X } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
 import { Calendar } from "~/components/ui/calendar"
@@ -81,6 +81,16 @@ export function DatePicker({
       // Format date as YYYY-MM-DD for HTML date input compatibility
       const formattedDate = selectedDate.toISOString().split('T')[0]
       onChange(formattedDate)
+    } else if (!selectedDate && onChange) {
+      onChange('')
+    }
+  }
+
+  const handleClear = () => {
+    setDate(undefined)
+    setInputValue("")
+    if (onChange) {
+      onChange('')
     }
   }
 
@@ -110,7 +120,7 @@ export function DatePicker({
           value={inputValue}
           placeholder={placeholder}
           className={cn(
-            "bg-background pr-10",
+            "bg-background pr-16",
             error && "border-red-500"
           )}
           onChange={handleInputChange}
@@ -122,6 +132,19 @@ export function DatePicker({
           }}
           disabled={disabled}
         />
+        {inputValue && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-1/2 right-8 size-6 -translate-y-1/2"
+            onClick={handleClear}
+            disabled={disabled}
+            type="button"
+          >
+            <X className="size-3" />
+            <span className="sr-only">Clear date</span>
+          </Button>
+        )}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button

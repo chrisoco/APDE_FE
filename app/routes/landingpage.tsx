@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router";
 import type { Route } from "./+types/landingpage";
-import type { PublicCampaignResponse, PublicCampaignData } from "../lib/types";
-import { apiHelpers } from "../lib/api";
-import { Button } from "../components/ui/button";
+import type { PublicCampaignResponse, PublicCampaignData } from "~/lib/types";
+import { apiHelpers } from "~/lib/api";
+import { Button } from "~/components/ui/button";
 
 export function meta({}: Route.MetaArgs) {
   return [

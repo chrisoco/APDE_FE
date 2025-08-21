@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import {
   type ColumnDef,
@@ -104,15 +102,7 @@ export function DataTable<TData, TValue>({
                 Columns <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            style={{ 
-              backgroundColor: 'white', 
-              border: '1px solid #e5e7eb',
-              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-              zIndex: 1000
-            }}
-          >
+          <DropdownMenuContent align="end" className="w-[180px]">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -160,18 +150,6 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-gray-50 transition-colors duration-200"
-                  style={{
-                    ':hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.05)'
-                    }
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = ''
-                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

@@ -1,19 +1,20 @@
 import * as React from "react";
 import { Outlet, redirect, useLoaderData } from "react-router";
 import type { Route } from "./+types/_layout";
-import { apiHelpers } from "../../lib/api";
-import { AppSidebar } from "../../components/app-sidebar";
-import { SiteHeader } from "../../components/site-header";
+import { apiHelpers } from "~/lib/api";
+import { clearAuthCookies } from "~/lib/csrf";
+import { AppSidebar } from "~/components/app-sidebar";
+import { SiteHeader } from "~/components/site-header";
 import {
   SidebarInset,
   SidebarProvider,
-} from "../../components/ui/sidebar";
+} from "~/components/ui/sidebar";
 
 export async function clientLoader() {
   try {
     const user = await apiHelpers.get("/api/user");
     return { user };
-  } catch (error) {
+  } catch {
     throw redirect("/admin/login");
   }
 }
@@ -32,6 +33,10 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       // Even if logout fails, redirect to login
       console.warn("Logout failed:", error);
     }
+    
+    // Clear client-side auth cookies
+    clearAuthCookies();
+    
     return redirect("/admin/login");
   }
 
@@ -39,7 +44,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 }
 
 export default function AdminLayout() {
-  const { user } = useLoaderData<typeof clientLoader>();
+  useLoaderData<typeof clientLoader>();
 
   return (
     <SidebarProvider

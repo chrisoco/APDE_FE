@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 
 interface AdminViewLayoutProps<T> {
   title: string
-  data: any
+  data: T[]
   columns: ColumnDef<T>[]
   loading: boolean
   error: string | null

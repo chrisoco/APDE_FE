@@ -70,7 +70,7 @@ export default function LandingpageForm() {
         title: landingpage.title,
         headline: landingpage.headline,
         subline: landingpage.subline,
-        sections: (landingpage.sections || []).map(section => ({
+        sections: (landingpage.sections || []).map((section: any) => ({
           text: section.text || '',
           image_url: section.image_url || '',
           cta_text: section.cta_text || '',

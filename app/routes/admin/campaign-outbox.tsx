@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import type { Campaign } from "../../lib/types";
-import { apiHelpers } from "../../lib/api";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Combobox } from "../../components/ui/combobox";
-import { Checkbox } from "../../components/ui/checkbox";
-import { Label } from "../../components/ui/label";
-import { Separator } from "../../components/ui/separator";
+import type { Campaign } from "~/lib/types";
+import { apiHelpers } from "~/lib/api";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Combobox } from "~/components/ui/combobox";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 
 interface EmailSendResponse {
   message: string;
@@ -49,7 +49,7 @@ export default function CampaignOutbox() {
       const activeCampaigns = (response.data || []).filter((campaign: Campaign) => campaign.status === 'Active');
       setCampaigns(activeCampaigns);
       setCampaignsLoaded(true);
-    } catch (err) {
+    } catch {
       setError('Failed to load campaigns');
     } finally {
       setLoadingCampaigns(false);
@@ -65,7 +65,7 @@ export default function CampaignOutbox() {
         { requiresAuth: true }
       );
       setSentStats(response);
-    } catch (err) {
+    } catch {
       console.error('Failed to load sent email stats:', err);
       setSentStats(null); // Only clear on error
     } finally {
@@ -97,7 +97,7 @@ export default function CampaignOutbox() {
       if (selectedCampaignId) {
         loadSentStats(selectedCampaignId);
       }
-    } catch (err) {
+    } catch {
       setError(err instanceof Error ? err.message : 'Failed to send emails');
     } finally {
       setLoading(false);
@@ -139,6 +139,9 @@ export default function CampaignOutbox() {
                 setSelectedCampaignId(value);
                 if (value) {
                   loadSentStats(value);
+                } else {
+                  // Clear stats when no campaign is selected
+                  setSentStats(null);
                 }
                 if (!campaignsLoaded) {
                   loadCampaigns();

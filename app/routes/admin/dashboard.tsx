@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import type { Route } from "../+types/admin";
-import type { Campaign } from "../../lib/types";
-import { apiHelpers } from "../../lib/api";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { Combobox } from "../../components/ui/combobox";
-import { Label } from "../../components/ui/label";
-import { Separator } from "../../components/ui/separator";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import type { Campaign } from "~/lib/types";
+import { apiHelpers } from "~/lib/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Combobox } from "~/components/ui/combobox";
+import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 interface CampaignOverview {
   campaign_id: string;
@@ -51,7 +49,7 @@ interface CampaignAnalytics {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658', '#ff7300'];
 
-export default function AdminIndex(_: Route.ComponentProps) {
+export default function AdminIndex() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
@@ -73,7 +71,7 @@ export default function AdminIndex(_: Route.ComponentProps) {
       const response = await apiHelpers.get('/api/campaigns');
       setCampaigns(response.data || []);
       setCampaignsLoaded(true);
-    } catch (err) {
+    } catch {
       setError('Failed to load campaigns');
     } finally {
       setLoadingCampaigns(false);
@@ -89,7 +87,7 @@ export default function AdminIndex(_: Route.ComponentProps) {
         { requiresAuth: true }
       );
       setAnalytics(response);
-    } catch (err) {
+    } catch {
       setError('Failed to load analytics data');
       setAnalytics(null);
     } finally {

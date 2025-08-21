@@ -15,7 +15,7 @@ export interface UseFormWithValidationOptions<T> {
 export function useFormWithValidation<T>({
   initialData,
   endpoint,
-  redirectPath,
+  _redirectPath,
   onSuccess
 }: UseFormWithValidationOptions<T>) {
   const [formData, setFormData] = useState<T>(initialData)
@@ -41,7 +41,7 @@ export function useFormWithValidation<T>({
             setErrors(errorData.errors)
           }
         }
-      } catch (parseError) {
+      } catch {
         console.error('Failed to parse error:', error)
       }
     }

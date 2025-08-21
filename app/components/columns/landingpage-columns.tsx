@@ -1,6 +1,4 @@
-"use client"
-
-import { type ColumnDef } from "@tanstack/react-table"
+import type { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import { Button } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -13,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
-import type { Landingpage } from "../../lib/types"
+import type { Landingpage } from "~/lib/types"
 
 const truncateText = (text: string, maxLength: number = 50) => {
   return text.length > maxLength ? `${text.substring(0, maxLength)}...` : text;

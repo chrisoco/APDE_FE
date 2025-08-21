@@ -17,7 +17,7 @@ import { FormActions } from "~/components/ui/form-actions"
 
 import { apiHelpers } from "~/lib/api"
 import { ProspectFilter } from "~/components/prospect-filter"
-import type { ProspectFilter as ProspectFilterType } from "~/services/prospects"
+import type { ProspectFilter as ProspectFilterType } from "~/lib/types"
 import { transformProspectFilterForAPI, transformProspectFilterFromAPI } from "~/utils/prospect-filter"
 import { useFormWithValidation } from "~/hooks/useFormWithValidation"
 
@@ -47,7 +47,7 @@ export default function CampaignForm() {
   const {
     formData,
     updateFormData,
-    errors,
+    // errors: _errors,
     loading,
     getFieldError,
     submitForm

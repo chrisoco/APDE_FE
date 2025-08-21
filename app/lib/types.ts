@@ -5,11 +5,7 @@ export interface Campaign {
   start_date: string;
   end_date: string;
   status: string;
-  prospect_filter: {
-    max_age?: number;
-    gender?: string;
-    source?: string;
-  };
+  prospect_filter: ProspectFilter;
   slug: string;
   landingpage_id: string | null;
   landingpage?: {
@@ -82,12 +78,7 @@ export interface Landingpage {
     end_date: string;
     status: string;
     slug: string;
-    prospect_filter: {
-      max_age?: number;
-      min_age?: number;
-      gender?: string;
-      source?: string;
-    };
+    prospect_filter: ProspectFilter;
   }[];
   title: string;
   headline: string;
@@ -97,11 +88,31 @@ export interface Landingpage {
 
 export type LandingpageResponse = PaginatedResponse<Landingpage>;
 
-export interface PublicLandingpageSection {
-  text: string;
-  image_url: string;
-  cta_text: string;
-  cta_url: string;
+// Prospect Filter Types
+export interface SearchCriteriaResponse {
+  source?: string[]
+  gender?: string[]
+  age?: { min: number; max: number }
+  birth_date?: { min: string; max: string }
+  blood_group?: string[]
+  height?: { min: number; max: number }
+  weight?: { min: number; max: number }
+  eye_color?: string[]
+  hair_color?: string[]
+  "address.city"?: string[]
+  "address.state"?: string[]
+  "address.country"?: string[]
+  "address.plz"?: { min: string; max: string }
+  "address.latitude"?: { min: number; max: number }
+  "address.longitude"?: { min: number; max: number }
+}
+
+export interface ProspectFilter {
+  max_age?: number;
+  min_age?: number;
+  gender?: string;
+  source?: string;
+  [key: string]: any;
 }
 
 export interface PublicLandingpage {
@@ -109,7 +120,7 @@ export interface PublicLandingpage {
   title: string;
   headline: string;
   subline: string;
-  sections: PublicLandingpageSection[];
+  sections: LandingpageSection[];
 }
 
 export interface PublicCampaignData {

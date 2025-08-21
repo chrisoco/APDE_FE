@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
@@ -12,8 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card"
+import type { ChartConfig } from "~/components/ui/chart"
 import {
-  ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -25,10 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select"
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "~/components/ui/toggle-group"
 
 export const description = "An interactive area chart"
 
@@ -175,21 +169,9 @@ export function ChartAreaInteractive() {
           <span className="@[540px]/card:hidden">Last 3 months</span>
         </CardDescription>
         <CardAction>
-          <ToggleGroup
-            type="single"
-            value={timeRange}
-            onValueChange={setTimeRange}
-            variant="outline"
-            className="hidden *:data-[slot=toggle-group-item]:!px-4 @[767px]/card:flex"
-          >
-            <ToggleGroupItem value="90d">Last 3 months</ToggleGroupItem>
-            <ToggleGroupItem value="30d">Last 30 days</ToggleGroupItem>
-            <ToggleGroupItem value="7d">Last 7 days</ToggleGroupItem>
-          </ToggleGroup>
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger
-              className="flex w-40 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate @[767px]/card:hidden"
-              size="sm"
+              className="flex w-40"
               aria-label="Select a value"
             >
               <SelectValue placeholder="Last 3 months" />

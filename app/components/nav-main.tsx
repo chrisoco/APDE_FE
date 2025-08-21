@@ -1,7 +1,6 @@
-import { IconCirclePlusFilled, IconMail, type Icon } from "@tabler/icons-react"
+import type { LucideIcon } from "lucide-react"
 import { NavLink } from "react-router"
 
-import { Button } from "~/components/ui/button"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -16,7 +15,7 @@ export function NavMain({
   items: {
     title: string
     url: string
-    icon?: Icon
+    icon?: LucideIcon
   }[]
 }) {
   return (

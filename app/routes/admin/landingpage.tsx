@@ -1,10 +1,9 @@
-import type { Route } from "../+types/admin";
-import type { LandingpageResponse } from "../../lib/types";
-import { landingpageColumns } from "../../components/columns/landingpage-columns";
-import { AdminListLayout } from "../../components/ui/admin-list-layout";
-import { useAdminList } from "../../hooks/useAdminList";
+import type { LandingpageResponse } from "~/lib/types";
+import { landingpageColumns } from "~/components/columns/landingpage-columns";
+import { AdminListLayout } from "~/components/ui/admin-list-layout";
+import { useAdminList } from "~/hooks/useAdminList";
 
-export default function Landingpage(_: Route.ComponentProps) {
+export default function Landingpage() {
   const {
     data: landingpages,
     loading,
