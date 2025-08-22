@@ -34,7 +34,8 @@ export default function Campaign() {
   } = useAdminActions({
     endpoint: '/api/campaigns',
     basePath: '/admin/campaign',
-    cacheKey: CACHE_TAGS.CAMPAIGNS
+    cacheKey: CACHE_TAGS.CAMPAIGNS,
+    entityName: 'Campaign'
   });
 
   // Create columns with proper handler injection

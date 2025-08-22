@@ -50,7 +50,8 @@ export default function LandingpageForm() {
     endpoint: '/api/landingpages',
     redirectPath: '/admin/landingpage',
     cacheKey: CACHE_TAGS.LANDINGPAGES,
-    onSuccess: () => navigate('/admin/landingpage')
+    onSuccess: () => navigate('/admin/landingpage'),
+    entityName: 'Landing Page'
   })
 
   const [fetchingData, setFetchingData] = useState(isEditing)

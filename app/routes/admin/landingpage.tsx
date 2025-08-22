@@ -33,7 +33,8 @@ export default function Landingpage() {
   } = useAdminActions({
     endpoint: '/api/landingpages',
     basePath: '/admin/landingpage',
-    cacheKey: CACHE_TAGS.LANDINGPAGES
+    cacheKey: CACHE_TAGS.LANDINGPAGES,
+    entityName: 'Landing Page'
   });
 
   // Create columns with proper handler injection

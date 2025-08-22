@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useRevalidator } from 'react-router'
+import { toast } from 'sonner'
 import { apiHelpers } from '~/lib/api'
 import { cacheManager } from '~/lib/cache-manager'
 
@@ -7,6 +8,7 @@ interface UseAdminActionsOptions {
   basePath: string
   endpoint: string
   cacheKey?: string
+  entityName?: string
 }
 
 interface DeleteItem {
@@ -14,7 +16,7 @@ interface DeleteItem {
   title: string
 }
 
-export function useAdminActions({ basePath, endpoint, cacheKey }: UseAdminActionsOptions) {
+export function useAdminActions({ basePath, endpoint, cacheKey, entityName = 'Record' }: UseAdminActionsOptions) {
   const navigate = useNavigate()
   const revalidator = useRevalidator()
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -44,6 +46,7 @@ export function useAdminActions({ basePath, endpoint, cacheKey }: UseAdminAction
         includeCSRF: true
       })
       
+      toast.success(`${entityName} deleted successfully`)
       setDeleteOpen(false)
       setItemToDelete(null)
       
@@ -56,7 +59,7 @@ export function useAdminActions({ basePath, endpoint, cacheKey }: UseAdminAction
       revalidator.revalidate()
     } catch (error) {
       console.error('Delete failed:', error)
-      // Handle error (could set error state here)
+      toast.error(`Failed to delete ${entityName.toLowerCase()}`)
     } finally {
       setIsDeleting(false)
     }

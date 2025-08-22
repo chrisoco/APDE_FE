@@ -66,7 +66,8 @@ export default function CampaignForm() {
     endpoint: '/api/campaigns',
     redirectPath: '/admin/campaign',
     cacheKey: CACHE_TAGS.CAMPAIGNS,
-    onSuccess: () => navigate('/admin/campaign')
+    onSuccess: () => navigate('/admin/campaign'),
+    entityName: 'Campaign'
   })
 
   const [landingpages, setLandingpages] = useState<Landingpage[]>([])

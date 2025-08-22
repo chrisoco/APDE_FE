@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { toast } from "sonner"
 import { Button } from "./button"
 import {
   Dialog,
@@ -51,10 +52,12 @@ export function DeleteDialog({
         requiresAuth: true, 
         includeCSRF: true 
       })
+      toast.success(`${entityType} deleted successfully`)
       onSuccess?.()
       onOpenChange(false)
     } catch (error) {
       console.error(`Failed to delete ${entityType.toLowerCase()}:`, error)
+      toast.error(`Failed to delete ${entityType.toLowerCase()}`)
     } finally {
       setLoading(false)
     }

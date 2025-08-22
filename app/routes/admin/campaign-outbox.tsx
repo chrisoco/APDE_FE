@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLoaderData } from "react-router";
+import { toast } from "sonner";
 import type { Campaign, PaginatedResponse } from "~/lib/types";
 import { apiHelpers } from "~/lib/api";
 import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
@@ -77,7 +78,7 @@ export default function CampaignOutbox() {
 
     try {
       const params = forceOption ? { force: true } : undefined;
-      await apiHelpers.post<EmailSendResponse>(
+      const response = await apiHelpers.post<EmailSendResponse>(
         `/api/campaigns/${selectedCampaignId}/send-emails`,
         {},
         { 
@@ -86,12 +87,22 @@ export default function CampaignOutbox() {
           params 
         }
       );
+      
+      // Show success notification with email count
+      if (response.emails_sent > 0) {
+        toast.success(`${response.emails_sent} email${response.emails_sent !== 1 ? 's' : ''} sent successfully!`);
+      } else {
+        toast.info('No new emails were sent');
+      }
+      
       // Refresh the sent stats after successful send
       if (selectedCampaignId) {
         loadSentStats(selectedCampaignId);
       }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to send emails');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send emails';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

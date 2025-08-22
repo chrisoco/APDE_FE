@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useRevalidator } from 'react-router'
+import { toast } from 'sonner'
 import { apiHelpers } from '~/lib/api'
 import { cacheManager } from '~/lib/cache-manager'
 
@@ -13,6 +14,7 @@ interface UseFormWithValidationOptions<T> {
   redirectPath: string
   cacheKey?: string
   onSuccess?: () => void
+  entityName?: string
 }
 
 export function useFormWithValidation<T>({
@@ -20,7 +22,8 @@ export function useFormWithValidation<T>({
   endpoint,
   redirectPath: _redirectPath,
   cacheKey,
-  onSuccess
+  onSuccess,
+  entityName = 'Record'
 }: UseFormWithValidationOptions<T>) {
   const [formData, setFormData] = useState<T>(initialData)
   const [errors, setErrors] = useState<ValidationErrors>({})
@@ -68,11 +71,13 @@ export function useFormWithValidation<T>({
           requiresAuth: true, 
           includeCSRF: true 
         })
+        toast.success(`${entityName} updated successfully`)
       } else {
         await apiHelpers.post(endpoint, submitData, { 
           requiresAuth: true, 
           includeCSRF: true 
         })
+        toast.success(`${entityName} created successfully`)
       }
 
       // Invalidate cache if cacheKey provided
@@ -87,6 +92,7 @@ export function useFormWithValidation<T>({
       return true
     } catch (error: any) {
       parseApiError(error)
+      toast.error(`Failed to ${options.isEditing ? 'update' : 'create'} ${entityName.toLowerCase()}`)
       return false
     } finally {
       setLoading(false)
