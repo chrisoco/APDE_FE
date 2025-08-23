@@ -46,6 +46,7 @@ export default function Home() {
                 <a
                   href="#features"
                   className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  aria-label="Learn more about our features and capabilities"
                 >
                   Learn more <span aria-hidden="true">→</span>
                 </a>
@@ -62,7 +63,7 @@ export default function Home() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                         </svg>
                       </div>
-                      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Campaign Analytics</h3>
+                      <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Campaign Analytics</h2>
                       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Track performance with real-time insights</p>
                     </div>
                     
@@ -72,7 +73,7 @@ export default function Home() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                       </div>
-                      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Landing Pages</h3>
+                      <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Landing Pages</h2>
                       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Build high-converting landing pages</p>
                     </div>
                     
@@ -82,7 +83,7 @@ export default function Home() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
                       </div>
-                      <h3 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Prospect Management</h3>
+                      <h2 className="mt-4 text-lg font-semibold text-gray-900 dark:text-white">Prospect Management</h2>
                       <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Organize and nurture your leads</p>
                     </div>
                   </div>
