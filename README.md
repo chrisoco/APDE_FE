@@ -37,9 +37,12 @@ Your application will be available at `http://localhost:5173`.
 - `npm run dev` - Start development server with HMR
 - `npm run build` - Create production build
 - `npm run start` - Start production server
-- `npm run typecheck` - Run TypeScript type checking
+- `npm run typecheck` - Run TypeScript type checking and generate route types
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Run ESLint with auto-fix
+- `npm run knip` - Find unused files, dependencies and exports
+- `npm run fix` - Run typecheck, lint:fix and knip in sequence
+- `npx serve build/client -p 3000 -s` - Run production
 
 ## Project Structure
 
@@ -56,8 +59,7 @@ app/
 │   └── landingpage.tsx # Public landing pages
 ├── lib/                # Utilities and types
 ├── hooks/              # Custom React hooks
-├── services/           # API service layer
-└── utils/              # Helper functions
+└── services/           # API service layer
 ```
 
 ## Key Technologies
