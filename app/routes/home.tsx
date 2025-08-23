@@ -46,6 +46,7 @@ export default function Home() {
                 <a
                   href="#features"
                   className="text-sm font-semibold leading-6 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  aria-label="Learn more about our features and capabilities"
                 >
                   Learn more <span aria-hidden="true">→</span>
                 </a>

@@ -147,6 +147,7 @@ export default function CampaignLandingPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center space-x-2"
+                            aria-label={`${section.cta_text} - ${data.title}`}
                           >
                             <span>{section.cta_text}</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,6 +191,7 @@ export default function CampaignLandingPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center space-x-2"
+                            aria-label={`${section.cta_text} - ${data.title}`}
                           >
                             <span>{section.cta_text}</span>
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,6 +227,7 @@ export default function CampaignLandingPage() {
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center space-x-2"
+                          aria-label={`${section.cta_text} - ${data.title}`}
                         >
                           <span>{section.cta_text}</span>
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +250,7 @@ export default function CampaignLandingPage() {
         <div className="relative container mx-auto px-4 py-16">
           <div className="text-center space-y-8">
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-white">{data.title}</h3>
+              <h2 className="text-2xl font-bold text-white">{data.title}</h2>
             </div>
             <div className="border-t border-slate-700 pt-8">
               <p className="text-slate-400 text-sm">
