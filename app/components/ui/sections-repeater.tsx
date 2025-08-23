@@ -8,13 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Plus, Trash2, GripVertical } from "lucide-react"
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
-
-type LandingpageSection = {
-  text: string
-  image_url: string
-  cta_text: string
-  cta_url: string
-}
+import type { LandingpageSection } from '~/lib/types'
 
 interface SectionsRepeaterProps {
   sections: LandingpageSection[]

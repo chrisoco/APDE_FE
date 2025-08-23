@@ -129,12 +129,9 @@ export function SearchFilter({
         const fieldName = key.replace('max_', '')
         params[`max_${fieldName}`] = filterValue
       } else if (Array.isArray(filterValue)) {
-        // For arrays, add each value with _in[] suffix
-        filterValue.forEach(val => {
-          const paramKey = `${key}_in[]`
-          if (!params[paramKey]) params[paramKey] = []
-          params[paramKey].push(val)
-        })
+        // For arrays, add each value as a separate parameter with _in[] suffix
+        const paramKey = `${key}_in[]`
+        params[paramKey] = filterValue
       } else {
         params[key] = filterValue
       }

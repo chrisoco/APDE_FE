@@ -5,7 +5,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 interface ApiOptions extends RequestInit {
   requiresAuth?: boolean;
   includeCSRF?: boolean;
-  params?: Record<string, string | number | boolean>;
+  params?: Record<string, string | number | boolean | string[]>;
 }
 
 export async function api(endpoint: string, options: ApiOptions = {}): Promise<Response> {
@@ -16,7 +16,14 @@ export async function api(endpoint: string, options: ApiOptions = {}): Promise<R
   if (params) {
     const urlParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      urlParams.append(key, String(value));
+      if (Array.isArray(value)) {
+        // For arrays, append each value with the same key (for query params like key[]=val1&key[]=val2)
+        value.forEach(item => {
+          urlParams.append(key, String(item));
+        });
+      } else {
+        urlParams.append(key, String(value));
+      }
     });
     url += `${url.includes('?') ? '&' : '?'}${urlParams.toString()}`;
   }

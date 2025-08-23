@@ -10,13 +10,7 @@ import { FormActions } from "~/components/ui/form-actions"
 import { apiHelpers } from "~/lib/api"
 import { useFormWithValidation } from "~/hooks/useFormWithValidation"
 import { CACHE_TAGS } from "~/lib/cache-manager"
-
-type LandingpageSection = {
-  text: string
-  image_url: string
-  cta_text: string
-  cta_url: string
-}
+import type { LandingpageSection } from "~/lib/types"
 
 type Landingpage = {
   id?: string

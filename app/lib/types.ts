@@ -74,9 +74,15 @@ export interface Landingpage {
   title: string;
   headline: string;
   subline: string;
-  sections: any[];
+  sections: LandingpageSection[];
 }
 
+export interface LandingpageSection {
+  text: string;
+  image_url: string;
+  cta_text: string;
+  cta_url: string;
+}
 
 export interface ProspectFilter {
   max_age?: number;
