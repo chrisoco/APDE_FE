@@ -15,7 +15,7 @@ The wrapper automatically configures:
 ### Import
 
 ```typescript
-import { api, apiJson, apiHelpers } from "../lib/api";
+import { api, apiHelpers } from "~/lib/api";
 ```
 
 ### Core Functions
@@ -31,16 +31,6 @@ const response = await api("/api/users", {
 });
 ```
 
-#### `apiJson(endpoint, options)`
-
-Higher-level wrapper that automatically parses JSON responses and handles errors.
-
-```typescript
-const users = await apiJson<User[]>("/api/users", {
-  method: "GET",
-  requiresAuth: true
-});
-```
 
 ### Helper Methods
 
@@ -58,6 +48,11 @@ const protectedData = await apiHelpers.get("/api/protected", {
 // GET with query parameters
 const filtered = await apiHelpers.get("/api/users", {
   params: { status: "active", role: "admin" }
+});
+
+// GET with array parameters (for filtering)
+const campaigns = await apiHelpers.get("/api/campaigns", {
+  params: { status: ["active", "draft"], categories: ["email", "social"] }
 });
 ```
 
@@ -134,9 +129,9 @@ const campaigns = await apiHelpers.paginated<CampaignResponse>(
 
 ```typescript
 interface ApiOptions extends RequestInit {
-  requiresAuth?: boolean;     // Auto-redirect to /login on 401
+  requiresAuth?: boolean;     // Auto-redirect to /admin/login on 401
   includeCSRF?: boolean;      // Include XSRF token header
-  params?: Record<string, string | number | boolean>; // Query parameters
+  params?: Record<string, string | number | boolean | string[]>; // Query parameters (includes array support)
 }
 ```
 
@@ -154,16 +149,61 @@ interface PaginationOptions {
 The wrapper automatically:
 - Throws errors for non-2xx responses
 - Redirects to `/admin/login` when `requiresAuth: true` and response is 401
+- Uses `window.location.href` for redirects to ensure full page navigation
 - Includes response status and error text in error messages
+
+### Basic Error Handling
 
 ```typescript
 try {
   const data = await apiHelpers.get("/api/protected", { requiresAuth: true });
 } catch (error) {
-  // Will automatically redirect to /login if 401
+  // Will automatically redirect to /admin/login if 401
   // Or throw descriptive error for other status codes
   console.error("API Error:", error.message);
 }
+```
+
+### Form Validation Error Handling
+
+The `useFormWithValidation` hook automatically parses Laravel validation errors:
+
+```typescript
+const { getFieldError, submitForm } = useFormWithValidation({
+  initialData: { email: '', password: '' },
+  endpoint: '/api/users',
+  // ... other options
+});
+
+// In your component
+{getFieldError('email') && (
+  <span className="text-red-600">{getFieldError('email')}</span>
+)}
+
+// Errors are automatically parsed from API responses like:
+// {
+//   "message": "The given data was invalid.",
+//   "errors": {
+//     "email": ["The email field is required."],
+//     "password": ["The password must be at least 8 characters."]
+//   }
+// }
+```
+
+### Toast Notifications
+
+Both form submissions and delete operations automatically show toast notifications:
+
+```typescript
+// Success toasts
+toast.success('Campaign created successfully')
+toast.success('Campaign updated successfully') 
+toast.success('Campaign deleted successfully')
+
+// Error toasts
+toast.error('Failed to create campaign')
+toast.error('Failed to update campaign')
+toast.error('Failed to delete campaign')
 ```
 
 ## Caching Integration
@@ -176,10 +216,10 @@ The API wrapper integrates with the cache manager (`~/lib/cache-manager`) for op
 import { CACHE_TAGS } from "~/lib/cache-manager";
 
 // Available cache tags
-CACHE_TAGS.CAMPAIGNS    // Campaign data
-CACHE_TAGS.PROSPECTS    // Prospect data  
-CACHE_TAGS.LANDINGPAGES // Landing page data
-CACHE_TAGS.USER         // User data
+CACHE_TAGS.CAMPAIGNS    // 'campaigns'
+CACHE_TAGS.PROSPECTS    // 'prospects'
+CACHE_TAGS.LANDINGPAGES // 'landingpages'
+CACHE_TAGS.USER         // 'user'
 ```
 
 ### Using withCache
@@ -189,7 +229,7 @@ import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 
 // Cache API responses with TTL and automatic invalidation
 const campaigns = await withCache(
-  () => apiHelpers.paginated('/api/campaigns', { per_page: 50 }),
+  () => apiHelpers.paginated('/api/campaigns', { page: 1, per_page: 50 }, { requiresAuth: true }),
   CACHE_TAGS.CAMPAIGNS,
   { 
     ttl: 2 * 60 * 1000,           // 2 minutes cache
@@ -208,7 +248,8 @@ The cache automatically invalidates when data changes through various mutation o
 const { handleDeleteConfirm } = useAdminActions({
   endpoint: '/api/campaigns',
   basePath: '/admin/campaign',
-  cacheKey: CACHE_TAGS.CAMPAIGNS // Automatically invalidates on delete
+  cacheKey: CACHE_TAGS.CAMPAIGNS, // Automatically invalidates on delete
+  entityName: 'Campaign'
 });
 ```
 
@@ -220,7 +261,8 @@ const { submitForm } = useFormWithValidation({
   endpoint: '/api/campaigns',
   redirectPath: '/admin/campaign',
   cacheKey: CACHE_TAGS.CAMPAIGNS, // Automatically invalidates on create/update
-  onSuccess: () => navigate('/admin/campaign')
+  onSuccess: () => navigate('/admin/campaign'),
+  entityName: 'Campaign'
 });
 ```
 
@@ -243,9 +285,10 @@ cacheManager.clear();
 - **Performance**: Subsequent requests served from memory cache
 - **Consistency**: Same cached data across multiple routes  
 - **Automatic Invalidation**: Cache clears when data is created, updated, or deleted
-- **TTL Support**: Automatic refresh after expiration (default: 2 minutes)
+- **TTL Support**: Automatic refresh after expiration (default: 5 minutes, configurable to 2 minutes)
 - **Parallel Requests**: Auto-fetch all pagination combined with smart caching
-- **Real-time Updates**: Immediate UI updates after mutations
+- **Real-time Updates**: Immediate UI updates after mutations via `useRevalidator()`
+- **Toast Notifications**: Built-in success/error feedback for user actions
 
 ## Environment Variables
 
@@ -260,13 +303,14 @@ VITE_API_URL=https://your-api.com
 ### Fetching User Data in a Route Loader
 
 ```typescript
-import { apiHelpers } from "../lib/api";
+import { apiHelpers } from "~/lib/api";
+import { redirect } from "react-router";
 
 export async function clientLoader() {
   try {
     const user = await apiHelpers.get("/api/user");
     return { user };
-  } catch (error) {
+  } catch {
     throw redirect("/admin/login");
   }
 }
@@ -275,10 +319,12 @@ export async function clientLoader() {
 ### Form Submission with CSRF
 
 ```typescript
-export async function clientAction({ request }: Route.ClientActionArgs) {
+import type { ClientActionFunctionArgs } from "react-router";
+
+export async function clientAction({ request }: ClientActionFunctionArgs) {
   const formData = await request.formData();
-  const email = String(formData.get("email"));
-  const password = String(formData.get("password"));
+  const email = String(formData.get("email") || "");
+  const password = String(formData.get("password") || "");
 
   try {
     // Get CSRF cookie first
@@ -290,8 +336,18 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     });
     
     return redirect("/admin");
-  } catch (error) {
-    return { error: error.message };
+  } catch (error: any) {
+    let message = "Login failed";
+    if (error instanceof Error && error.message.includes("API Error:")) {
+      try {
+        const errorMessage = error.message.split("API Error: ")[1];
+        const data = JSON.parse(errorMessage.split(" ").slice(1).join(" "));
+        if (data?.message) message = data.message;
+      } catch (parseError) {
+        console.debug('Failed to parse error message as JSON:', parseError);
+      }
+    }
+    return { error: message };
   }
 }
 ```
@@ -313,7 +369,7 @@ export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
       { requiresAuth: true }
     ),
     CACHE_TAGS.CAMPAIGNS,
-    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.CAMPAIGNS] } // 2 minutes cache
+    { ttl: 2 * 60 * 1000 } // 2 minutes cache
   );
 }
 
@@ -367,23 +423,29 @@ Here's how to implement a complete CRUD interface with automatic caching and cac
 #### 1. List Route (Read)
 
 ```typescript
-// app/routes/admin/campaigns.tsx
+// app/routes/admin/campaign.tsx
 import { useLoaderData } from "react-router";
+import type { Route } from "./+types/campaign";
+import type { Campaign, PaginatedResponse } from "~/lib/types";
+import { campaignColumns } from "~/components/columns/campaign-columns";
+import { AdminListLayout } from "~/components/ui/admin-list-layout";
+import { useAdminActions } from "~/hooks/useAdminActions";
+import { apiHelpers } from "~/lib/api";
 import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 
 export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
   return withCache(
     () => apiHelpers.paginated<PaginatedResponse<Campaign>>(
       '/api/campaigns',
-      { page: 1, per_page: 50 }, // Auto-fetches all pages
+      { page: 1, per_page: 50 },
       { requiresAuth: true }
     ),
     CACHE_TAGS.CAMPAIGNS,
-    { ttl: 2 * 60 * 1000 } // 2 minutes cache
+    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.CAMPAIGNS] } // 2 minutes TTL
   );
 }
 
-export default function Campaigns() {
+export default function Campaign() {
   const campaigns = useLoaderData<typeof clientLoader>();
   
   const {
@@ -398,14 +460,21 @@ export default function Campaigns() {
   } = useAdminActions({
     endpoint: '/api/campaigns',
     basePath: '/admin/campaign',
-    cacheKey: CACHE_TAGS.CAMPAIGNS // Auto-invalidates cache on delete
+    cacheKey: CACHE_TAGS.CAMPAIGNS,
+    entityName: 'Campaign'
   });
+
+  // Create columns with proper handler injection
+  const columns = campaignColumns(handleEdit, handleDelete);
 
   return (
     <AdminListLayout
       title="Campaigns"
+      createButtonText="Create Campaign"
+      entityType="Campaign"
+      endpoint="/api/campaigns"
       data={campaigns}
-      columns={campaignColumns(handleEdit, handleDelete)}
+      columns={columns}
       deleteOpen={deleteOpen}
       setDeleteOpen={setDeleteOpen}
       itemToDelete={itemToDelete}
@@ -421,39 +490,73 @@ export default function Campaigns() {
 
 ```typescript
 // app/routes/admin/campaign-form.tsx
-import { useFormWithValidation } from "~/hooks/useFormWithValidation";
-import { CACHE_TAGS } from "~/lib/cache-manager";
+import { useState } from "react"
+import { useNavigate, useParams } from "react-router"
+import { useFormWithValidation } from "~/hooks/useFormWithValidation"
+import { CACHE_TAGS } from "~/lib/cache-manager"
+import type { ProspectFilter } from "~/lib/types"
+
+type Campaign = {
+  id?: string
+  title: string
+  description: string
+  start_date: string
+  end_date: string
+  status: 'draft' | 'active' | 'paused' | 'completed'
+  slug: string
+  landingpage_id: string | null
+  prospect_filter?: ProspectFilter
+}
 
 export default function CampaignForm() {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const isEditing = !!id;
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const isEditing = !!id
 
-  const { formData, updateFormData, loading, submitForm } = useFormWithValidation({
+  const {
+    formData,
+    updateFormData,
+    loading,
+    getFieldError,
+    submitForm
+  } = useFormWithValidation<Campaign>({
     initialData: {
       title: '',
       description: '',
-      // ... other fields
+      start_date: '',
+      end_date: '',
+      status: 'draft',
+      slug: '',
+      landingpage_id: null
     },
     endpoint: '/api/campaigns',
     redirectPath: '/admin/campaign',
-    cacheKey: CACHE_TAGS.CAMPAIGNS, // Auto-invalidates cache on create/update
-    onSuccess: () => navigate('/admin/campaign')
-  });
+    cacheKey: CACHE_TAGS.CAMPAIGNS,
+    onSuccess: () => navigate('/admin/campaign'),
+    entityName: 'Campaign'
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await submitForm(formData, { isEditing, id });
-  };
+    e.preventDefault()
+    await submitForm(formData, { isEditing, id })
+  }
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Form fields */}
+      {/* Form fields with error handling */}
+      <input 
+        value={formData.title} 
+        onChange={(e) => updateFormData({ title: e.target.value })}
+      />
+      {getFieldError('title') && (
+        <span className="error">{getFieldError('title')}</span>
+      )}
+      
       <button type="submit" disabled={loading}>
-        {loading ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+        {loading ? 'Saving...' : (isEditing ? 'Update Campaign' : 'Create Campaign')}
       </button>
     </form>
-  );
+  )
 }
 ```
 
@@ -480,7 +583,9 @@ graph TD
 
 ✅ **Auto-Fetch All Pages**: Automatically combines paginated results  
 ✅ **Smart Caching**: 2-minute TTL with automatic invalidation  
-✅ **Real-time Updates**: Cache invalidation triggers immediate UI updates  
+✅ **Real-time Updates**: Cache invalidation triggers immediate UI updates via `revalidator.revalidate()`  
 ✅ **Optimistic UX**: Loading states and error handling built-in  
 ✅ **Type Safety**: Full TypeScript support throughout  
-✅ **Error Boundaries**: Route-level error handling with retry options
+✅ **Toast Notifications**: Built-in success/error feedback using Sonner  
+✅ **Form Validation**: Automatic Laravel validation error parsing and display  
+✅ **Array Query Params**: Support for filtering with multiple values
