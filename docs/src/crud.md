@@ -1,82 +1,132 @@
-# CRUD Implementation Guide
-## CRUD Operations Summary
+# CRUD Implementierungsleitfaden
+## CRUD Operationen Übersicht
 
-### Campaigns
+### Kampagnen
 
-- **List (Read All):**
-  - File: `app/routes/admin/campaign.tsx`
-  - Uses `clientLoader` for paginated fetch from `/api/campaigns` with smart caching (`CACHE_TAGS.CAMPAIGNS`).
-  - UI: `AdminListLayout` with edit/delete actions via `useAdminActions`.
-- **Create:**
-  - File: `app/routes/admin/campaign-form.tsx`
-  - Uses `useFormWithValidation` with endpoint `/api/campaigns`. Fields: title, slug (auto), description, dates, status, landing page, prospect filter.
-  - On submit, calls `submitForm`, redirects, and invalidates cache.
-- **Read (Single):**
-  - File: `app/routes/admin/campaign-form.tsx`
-  - On edit, fetches campaign by ID from `/api/campaigns/:id` and populates form.
-- **Update:**
-  - File: `app/routes/admin/campaign-form.tsx`
-  - If editing, submits to `/api/campaigns/:id` (via `submitForm` with `isEditing`). Updates cache and redirects.
-- **Delete:**
-  - File: `app/routes/admin/campaign.tsx`
-  - Uses `useAdminActions` to delete via `/api/campaigns/:id`. Confirmation dialog, cache update, toast notification.
+- **Liste (Alle lesen):**
+  - Datei: `app/routes/admin/campaign.tsx`
+  - Verwendet `clientLoader` für paginierte Abfrage von `/api/campaigns` mit intelligentem Caching (`CACHE_TAGS.CAMPAIGNS`).
+  - UI: `AdminListLayout` mit Bearbeiten/Löschen-Aktionen über `useAdminActions`.
+- **Erstellen:**
+  - Datei: `app/routes/admin/campaign-form.tsx`
+  - Verwendet `useFormWithValidation` mit Endpunkt `/api/campaigns`. Felder: Titel, Slug (automatisch), Beschreibung, Daten, Status, Landing Page, Interessenten-Filter.
+  - Bei Absenden wird `submitForm` aufgerufen, umgeleitet und Cache invalidiert.
+- **Lesen (Einzeln):**
+  - Datei: `app/routes/admin/campaign-form.tsx`
+  - Bei Bearbeitung wird Kampagne über ID von `/api/campaigns/:id` abgerufen und Formular befüllt.
+- **Aktualisieren:**
+  - Datei: `app/routes/admin/campaign-form.tsx`
+  - Bei Bearbeitung wird an `/api/campaigns/:id` gesendet (über `submitForm` mit `isEditing`). Aktualisiert Cache und leitet um.
+- **Löschen:**
+  - Datei: `app/routes/admin/campaign.tsx`
+  - Verwendet `useAdminActions` zum Löschen über `/api/campaigns/:id`. Bestätigungsdialog, Cache-Update, Toast-Benachrichtigung.
 
 ### Landing Pages
 
-- **List (Read All):**
-  - File: `app/routes/admin/landingpage.tsx`
-  - Uses `clientLoader` for paginated fetch from `/api/landingpages` with smart caching (`CACHE_TAGS.LANDINGPAGES`).
-  - UI: `AdminListLayout` with edit/delete actions via `useAdminActions`.
-- **Create:**
-  - File: `app/routes/admin/landingpage-form.tsx`
-  - Uses `useFormWithValidation` with endpoint `/api/landingpages`. Fields: title, headline, subline, repeatable sections.
-  - On submit, calls `submitForm`, redirects, and invalidates cache.
-- **Read (Single):**
-  - File: `app/routes/admin/landingpage-form.tsx`
-  - On edit, fetches landing page by ID from `/api/landingpages/:id` and populates form.
-- **Update:**
-  - File: `app/routes/admin/landingpage-form.tsx`
-  - If editing, submits to `/api/landingpages/:id` (via `submitForm` with `isEditing`). Updates cache and redirects.
-- **Delete:**
-  - File: `app/routes/admin/landingpage.tsx`
-  - Uses `useAdminActions` to delete via `/api/landingpages/:id`. Confirmation dialog, cache update, toast notification.
+- **Liste (Alle lesen):**
+  - Datei: `app/routes/admin/landingpage.tsx`
+  - Verwendet `clientLoader` für paginierte Abfrage von `/api/landingpages` mit intelligentem Caching (`CACHE_TAGS.LANDINGPAGES`).
+  - UI: `AdminListLayout` mit Bearbeiten/Löschen-Aktionen über `useAdminActions`.
+- **Erstellen:**
+  - Datei: `app/routes/admin/landingpage-form.tsx`
+  - Verwendet `useFormWithValidation` mit Endpunkt `/api/landingpages`. Felder: Titel, Überschrift, Untertitel, wiederholbare Sektionen.
+  - Bei Absenden wird `submitForm` aufgerufen, umgeleitet und Cache invalidiert.
+- **Lesen (Einzeln):**
+  - Datei: `app/routes/admin/landingpage-form.tsx`
+  - Bei Bearbeitung wird Landing Page über ID von `/api/landingpages/:id` abgerufen und Formular befüllt.
+- **Aktualisieren:**
+  - Datei: `app/routes/admin/landingpage-form.tsx`
+  - Bei Bearbeitung wird an `/api/landingpages/:id` gesendet (über `submitForm` mit `isEditing`). Aktualisiert Cache und leitet um.
+- **Löschen:**
+  - Datei: `app/routes/admin/landingpage.tsx`
+  - Verwendet `useAdminActions` zum Löschen über `/api/landingpages/:id`. Bestätigungsdialog, Cache-Update, Toast-Benachrichtigung.
 
-### Prospects
+### Interessenten
 
-- **List (Read All):**
-  - File: `app/routes/admin/prospects.tsx`
-  - Uses `clientLoader` for paginated fetch from `/api/prospects` with smart caching (`CACHE_TAGS.PROSPECTS`).
-  - UI: `AdminViewLayout` in read-only mode.
-- **Read (Single):**
-  - Not explicitly shown, but individual prospect data is available via the paginated list.
-- **Create / Update / Delete:**
-  - Not available. Prospects are read-only entities; no create, edit, or delete actions are exposed in the UI or API.
+- **Liste (Alle lesen):**
+  - Datei: `app/routes/admin/prospects.tsx`
+  - Verwendet `clientLoader` für paginierte Abfrage von `/api/prospects` mit intelligentem Caching (`CACHE_TAGS.PROSPECTS`).
+  - UI: `AdminViewLayout` im schreibgeschützten Modus.
+- **Lesen (Einzeln):**
+  - Nicht explizit gezeigt, aber individuelle Interessenten-Daten sind über die paginierte Liste verfügbar.
+- **Erstellen / Aktualisieren / Löschen:**
+  - Nicht verfügbar. Interessenten sind schreibgeschützte Entitäten; keine Erstellen-, Bearbeiten- oder Löschen-Aktionen sind in der UI oder API verfügbar.
 
-### Shared Features
+### Gemeinsame Funktionen
 
-- Smart caching (2-min TTL, tag-based invalidation)
-- Form validation (`useFormWithValidation`)
-- Optimistic UI (toast notifications, loading states)
-- Type safety (TypeScript interfaces)
-- Error handling (network, validation, boundaries)
+- Intelligentes Caching (2-Min TTL, tag-basierte Invalidierung)
+- Formularvalidierung (`useFormWithValidation`)
+- Optimistische UI (Toast-Benachrichtigungen, Ladezustände)
+- Typsicherheit (TypeScript-Interfaces)
+- Fehlerbehandlung (Netzwerk, Validierung, Boundaries)
 
-This guide documents the complete CRUD (Create, Read, Update, Delete) implementation patterns used in the APDE application for Campaigns, Landing Pages, and Prospects.
+Dieser Leitfaden dokumentiert die vollständigen CRUD (Create, Read, Update, Delete) Implementierungsmuster, die in der APDE-Anwendung für Kampagnen, Landing Pages und Interessenten verwendet werden.
 
-## Architecture Overview
+## Architektur Übersicht
 
-The application uses a modern React Router v7 pattern with:
-- **Route-based data loading** with `clientLoader` functions
-- **Form handling** with `useFormWithValidation` hook  
-- **Admin actions** with `useAdminActions` hook
-- **Smart caching** with automatic invalidation
-- **Type-safe API calls** with full TypeScript support
-- **Optimistic UI updates** with toast notifications
+Die Anwendung verwendet ein modernes React Router v7 Muster mit:
+- **Route-basiertes Datenladen** mit `clientLoader` Funktionen
+- **Formularverarbeitung** mit `useFormWithValidation` Hook
+- **Admin-Aktionen** mit `useAdminActions` Hook
+- **Intelligentes Caching** mit automatischer Invalidierung
+- **Typsichere API-Aufrufe** mit vollständiger TypeScript-Unterstützung
+- **Optimistische UI-Updates** mit Toast-Benachrichtigungen
 
-## Common Patterns
+```mermaid
+graph TB
+    subgraph "React Router v7 Frontend"
+        subgraph "Routes"
+            LIST["Liste Route<br/>app/routes/admin/[entity].tsx<br/>• clientLoader()<br/>• PaginatedResponse<T>"]
+            FORM["Formular Route<br/>app/routes/admin/[entity]-form.tsx<br/>• Create/Edit Logic<br/>• Validation"]
+        end
 
-### 1. List View Pattern
+        subgraph "Custom Hooks"
+            ADMIN["useAdminActions<br/>• handleEdit()<br/>• handleDelete()<br/>• handleCreate()<br/>• handleDeleteConfirm()"]
+            VALIDATION["useFormWithValidation<br/>• submitForm()<br/>• formData State<br/>• Error Handling"]
+        end
 
-All entity list views follow this pattern:
+        subgraph "UI Components"
+            LISTLAYOUT["AdminListLayout<br/>• DataTable<br/>• Create Button<br/>• Delete Dialog"]
+            FORMLAYOUT["FormLayout<br/>• Form Fields<br/>• FormActions<br/>• Validation Display"]
+        end
+    end
+
+    subgraph "API Layer"
+        API["apiHelpers<br/>~/lib/api.ts<br/>• get(), post(), put(), delete()<br/>• paginated()<br/>• CSRF + Auth"]
+        CACHE["Cache Manager<br/>~/lib/cache-manager.ts<br/>• withCache()<br/>• invalidate()<br/>• CACHE_TAGS"]
+    end
+
+    subgraph "Backend"
+        LARAVEL["Laravel API<br/>/api/campaigns<br/>/api/landingpages<br/>/api/prospects"]
+    end
+
+    LIST --> ADMIN
+    FORM --> VALIDATION
+    ADMIN --> LISTLAYOUT
+    VALIDATION --> FORMLAYOUT
+
+    LIST --> API
+    FORM --> API
+    API --> CACHE
+    API --> LARAVEL
+
+    ADMIN -.->|"Cache Invalidation"| CACHE
+    VALIDATION -.->|"Cache Invalidation"| CACHE
+
+    style LIST fill:#e1f5fe
+    style FORM fill:#e8f5e8
+    style ADMIN fill:#fff3e0
+    style VALIDATION fill:#fff3e0
+    style API fill:#f3e5f5
+    style CACHE fill:#f3e5f5
+    style LARAVEL fill:#ffebee
+```
+
+## Gemeinsame Muster
+
+### 1. Listenansicht-Muster
+
+Alle Entitätslisten-Ansichten folgen diesem Muster:
 
 ```typescript
 // app/routes/admin/[entity].tsx
@@ -120,9 +170,9 @@ export default function EntityList() {
 }
 ```
 
-### 2. Form Pattern
+### 2. Formular-Muster
 
-All entity forms follow this pattern:
+Alle Entitätsformulare folgen diesem Muster:
 
 ```typescript
 // app/routes/admin/[entity]-form.tsx
@@ -170,11 +220,11 @@ export default function EntityForm() {
 
 ---
 
-## Campaign CRUD Implementation
+## Kampagnen CRUD Implementierung
 
-Campaigns represent marketing campaigns with landing pages and prospect filtering.
+Kampagnen repräsentieren Marketing-Kampagnen mit Landing Pages und Interessenten-Filterung.
 
-### Campaign Data Structure
+### Kampagnen-Datenstruktur
 
 ```typescript
 interface Campaign {
@@ -194,7 +244,7 @@ interface Campaign {
 }
 ```
 
-### Campaign List View
+### Kampagnen-Listenansicht
 
 **File:** `app/routes/admin/campaign.tsx`
 
@@ -259,7 +309,7 @@ export default function Campaign() {
 }
 ```
 
-### Campaign Form
+### Kampagnen-Formular
 
 **File:** `app/routes/admin/campaign-form.tsx`
 
@@ -509,22 +559,22 @@ export default function CampaignForm() {
 }
 ```
 
-### Campaign Features
+### Kampagnen-Funktionen
 
-- **Auto-slug generation** from title
-- **Landing page relationship** with dropdown selection
-- **Date handling** with proper timezone conversion
-- **Prospect filtering** with complex filter builder
-- **Status management** with predefined options
-- **Validation** with field-level error display
+- **Automatische Slug-Generierung** aus Titel
+- **Landing Page Beziehung** mit Dropdown-Auswahl
+- **Datumsverarbeitung** mit ordnungsgemäßer Zeitzonenkonvertierung
+- **Interessenten-Filterung** mit komplexem Filter-Builder
+- **Status-Management** mit vordefinierten Optionen
+- **Validierung** mit Feld-spezifischer Fehleranzeige
 
 ---
 
-## Landing Page CRUD Implementation
+## Landing Page CRUD Implementierung
 
-Landing pages are content pages with sections that can be associated with campaigns.
+Landing Pages sind Inhaltsseiten mit Sektionen, die mit Kampagnen verknüpft werden können.
 
-### Landing Page Data Structure
+### Landing Page Datenstruktur
 
 ```typescript
 interface Landingpage {
@@ -544,7 +594,7 @@ interface LandingpageSection {
 }
 ```
 
-### Landing Page List View
+### Landing Page Listenansicht
 
 **File:** `app/routes/admin/landingpage.tsx`
 
@@ -595,7 +645,7 @@ export default function Landingpage() {
 }
 ```
 
-### Landing Page Form
+### Landing Page Formular
 
 **File:** `app/routes/admin/landingpage-form.tsx`
 
@@ -729,20 +779,20 @@ export default function LandingpageForm() {
 }
 ```
 
-### Landing Page Features
+### Landing Page Funktionen
 
-- **Section management** with repeatable section builder
-- **Rich content** with text, images, and CTAs
-- **Dynamic sections** add/remove functionality
-- **Content validation** per section
+- **Sektions-Management** mit wiederholbarem Sektions-Builder
+- **Reiche Inhalte** mit Text, Bildern und CTAs
+- **Dynamische Sektionen** Hinzufügen/Entfernen-Funktionalität
+- **Inhalts-Validierung** pro Sektion
 
 ---
 
-## Prospect CRUD Implementation
+## Interessenten CRUD Implementierung
 
-Prospects are read-only entities representing potential customers with demographic data.
+Interessenten sind schreibgeschützte Entitäten, die potenzielle Kunden mit demografischen Daten repräsentieren.
 
-### Prospect Data Structure
+### Interessenten-Datenstruktur
 
 ```typescript
 interface Prospect {
@@ -769,7 +819,7 @@ interface Prospect {
 }
 ```
 
-### Prospect View (Read-Only)
+### Interessenten-Ansicht (Schreibgeschützt)
 
 **File:** `app/routes/admin/prospects.tsx`
 
@@ -808,50 +858,50 @@ export default function Prospects() {
 }
 ```
 
-### Prospect Features
+### Interessenten-Funktionen
 
-- **Read-only view** with no create/edit/delete actions
-- **Rich demographic data** display
-- **Address information** with location data
-- **Filtering** and **search** capabilities through the view layout
+- **Schreibgeschützte Ansicht** ohne Erstellen/Bearbeiten/Löschen-Aktionen
+- **Umfangreiche demografische Daten** Anzeige
+- **Adressinformationen** mit Standortdaten
+- **Filter-** und **Such**-Möglichkeiten über das Ansichtslayout
 
 ---
 
-## Key Features Across All CRUD Implementations
+## Zentrale Funktionen in allen CRUD Implementierungen
 
-### 1. Smart Caching
-- **2-minute TTL** for all data
-- **Automatic invalidation** on create/update/delete
-- **Tag-based** cache management
-- **Route revalidation** after mutations
+### 1. Intelligentes Caching
+- **2-Minuten TTL** für alle Daten
+- **Automatische Invalidierung** bei Erstellen/Aktualisieren/Löschen
+- **Tag-basiertes** Cache-Management
+- **Route-Revalidierung** nach Mutationen
 
-### 2. Error Handling
-- **Field-level validation** with Laravel error parsing
-- **Form submission errors** with toast notifications
-- **Network error handling** with retry mechanisms
-- **Route-level error boundaries**
+### 2. Fehlerbehandlung
+- **Feld-spezifische Validierung** mit Laravel-Fehler-Parsing
+- **Formular-Übertragungsfehler** mit Toast-Benachrichtigungen
+- **Netzwerk-Fehlerbehandlung** mit Wiederholungsmechanismen
+- **Route-spezifische Error Boundaries**
 
-### 3. Loading States
-- **Form submission loading** with disabled buttons
-- **Data fetching loading** with skeleton states
-- **Optimistic updates** with immediate UI feedback
+### 3. Ladezustände
+- **Formular-Übertragung-Ladezustand** mit deaktivierten Buttons
+- **Datenabruf-Ladezustand** mit Skeleton-Zuständen
+- **Optimistische Updates** mit sofortigem UI-Feedback
 
-### 4. User Experience
-- **Toast notifications** for all actions
-- **Confirmation dialogs** for destructive actions
-- **Auto-save** draft functionality where applicable
-- **Keyboard shortcuts** and accessibility support
+### 4. Benutzererfahrung
+- **Toast-Benachrichtigungen** für alle Aktionen
+- **Bestätigungsdialoge** für destruktive Aktionen
+- **Auto-Speichern** Entwurfs-Funktionalität wo anwendbar
+- **Tastaturkürzel** und Barrierefreiheits-Unterstützung
 
-### 5. Type Safety
-- **Full TypeScript** implementation
-- **API response types** with proper interfaces
-- **Form validation types** matching backend schemas
-- **Route parameter types** with React Router v7
+### 5. Typsicherheit
+- **Vollständige TypeScript** Implementierung
+- **API-Antwort-Typen** mit ordnungsgemäßen Interfaces
+- **Formular-Validierungs-Typen** passend zu Backend-Schemas
+- **Route-Parameter-Typen** mit React Router v7
 
-### 6. Performance Optimizations
-- **Paginated data fetching** with auto-fetch all pages
-- **Parallel API requests** for related data
-- **Memoized column definitions** to prevent re-renders
-- **Lazy loading** of form components
+### 6. Performance-Optimierungen
+- **Paginierter Datenabruf** mit automatischem Abrufen aller Seiten
+- **Parallele API-Anfragen** für verwandte Daten
+- **Memoized Spaltendefinitionen** zur Vermeidung von Re-Renders
+- **Lazy Loading** von Formular-Komponenten
 
-This CRUD implementation provides a robust, scalable pattern that can be extended to any new entities in the application while maintaining consistency and performance.
+Diese CRUD-Implementierung bietet ein robustes, skalierbares Muster, das auf jede neue Entität in der Anwendung erweitert werden kann, während Konsistenz und Performance erhalten bleiben.
