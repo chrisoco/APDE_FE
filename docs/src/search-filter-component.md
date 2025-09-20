@@ -1,78 +1,144 @@
-# Search Filter Component
+# Such-Filter Komponente
 
-A generic, reusable component for creating dynamic search filters based on API-provided criteria. The `SearchFilter` component automatically generates form controls based on search criteria retrieved from an API endpoint, while `ProspectFilter` provides a prospect-specific implementation.
+Eine generische, wiederverwendbare Komponente zur Erstellung dynamischer Suchfilter basierend auf API-bereitgestellten Kriterien. Die `SearchFilter` Komponente generiert automatisch Formularsteuerelemente basierend auf Suchkriterien, die von einem API-Endpunkt abgerufen werden, während `ProspectFilter` eine interessenten-spezifische Implementierung bereitstellt.
 
-## Overview
+## Übersicht
 
-The search filter system consists of two main layers:
-1. **SearchFilter** - A generic component that handles dynamic filter generation based on API criteria
-2. **ProspectFilter** - A specialized wrapper that configures SearchFilter for prospect data
+Das Suchfilter-System besteht aus zwei Hauptebenen:
+1. **SearchFilter** - Eine generische Komponente, die dynamische Filter-Generierung basierend auf API-Kriterien verarbeitet
+2. **ProspectFilter** - Ein spezialisierter Wrapper, der SearchFilter für Interessenten-Daten konfiguriert
 
-The system supports real-time filter counts, flexible filter modes (range vs exact), and multiple data types.
+Das System unterstützt Echtzeit-Filter-Zählungen, flexible Filter-Modi (Bereich vs. exakt) und mehrere Datentypen.
 
-## Components
+```mermaid
+graph TB
+    subgraph "Frontend Components"
+        subgraph "Specialized Wrappers"
+            PF["ProspectFilter<br/>~/components/prospect-filter.tsx<br/>• Vorkonfigurierte Labels<br/>• /api/prospects Endpunkte<br/>• TypeScript ProspectFilter Interface"]
+        end
 
-### Main Components
-- `SearchFilter` (`~/components/ui/search-filter.tsx`) - Generic search filter component
-- `ProspectFilter` (`~/components/prospect-filter.tsx`) - Prospect-specific implementation
-- `RangeSlider` (`~/components/ui/range-slider.tsx`) - Dual-handle slider for min/max values
-- `MultiSelect` (`~/components/ui/multi-select.tsx`) - Multi-select combobox with badges
+        subgraph "Generic Core"
+            SF["SearchFilter<br/>~/components/ui/search-filter.tsx<br/>• Dynamische UI-Generierung<br/>• API-basierte Kriterien<br/>• Echtzeit-Zählungen"]
+        end
 
-### Supporting Components
-- `Slider` (`~/components/ui/slider.tsx`) - Base Radix UI slider with dual thumbs for range selection
-- `Badge` (`~/components/ui/badge.tsx`) - Display component for selected items
-- `DatePicker` (`~/components/ui/date-picker.tsx`) - Date selection component for date ranges
+        subgraph "UI Components"
+            RS["RangeSlider<br/>Doppelgriff-Slider<br/>• Min/Max Werte<br/>• Synchronisierte Inputs"]
+            MS["MultiSelect<br/>Mehrfachauswahl<br/>• Badge Display<br/>• Suchfunktion"]
+            DP["DatePicker<br/>Datumsauswahl<br/>• ISO Format<br/>• Bereichsauswahl"]
+        end
+    end
 
-## Filter Types
+    subgraph "API Layer"
+        CRITERIA["Search Criteria API<br/>GET /api/prospects/search-criteria<br/>• Verfügbare Filter<br/>• Min/Max Bereiche<br/>• Option Arrays"]
+        FILTER["Filter Count API<br/>GET /api/prospects/filter<br/>• Echtzeit-Zählung<br/>• Query Parameter<br/>• Debounced (500ms)"]
+    end
 
-The SearchFilter component automatically detects and renders appropriate UI controls based on the data type from the search criteria API.
+    subgraph "Filter Types & Logic"
+        subgraph "Numerische Filter"
+            RANGE["Bereichsmodus<br/>min_age: 25, max_age: 65<br/>• RangeSlider UI<br/>• Validierung"]
+            EXACT["Exakt-Modus<br/>age: 30, age_mode: 'exact'<br/>• Number Input<br/>• Radio Toggle"]
+        end
 
-### 1. Numeric Range Filters
-Fields with `{ min: number, max: number }` format support two interactive modes:
+        subgraph "Array Filter"
+            MULTI["Mehrfachauswahl<br/>source: 'kueba'<br/>source: ['kueba', 'erp']<br/>• MultiSelect UI<br/>• Intelligente Speicherung"]
+        end
 
-**Range Mode (default)**
-- Dual-handle `RangeSlider` component for visual range selection
-- Synchronized min/max input fields for precise numeric entry
-- Automatic validation to prevent min > max
-- Example: `{ min_age: 25, max_age: 65 }`
+        subgraph "Datum Filter"
+            DATE["Datumsbereiche<br/>min_birth_date, max_birth_date<br/>• DatePicker UI<br/>• ISO String Format"]
+        end
+    end
 
-**Exact Value Mode**
-- Single number input for exact matches
-- Radio button toggle to switch between modes
-- Mode state tracked with `{field}_mode` key
-- Example: `{ age: 30, age_mode: "exact" }`
+    subgraph "Data Flow"
+        TRANSFORM["transformFilterToQueryParams()<br/>• null/undefined entfernen<br/>• Arrays → field_in[] Format<br/>• Mode-Felder ausschließen"]
+    end
 
-### 2. Date Range Filters
-Fields with `{ min: string, max: string }` where field name contains "date":
-- Two `DatePicker` components for start/end dates
-- ISO date string handling with proper formatting
-- Example: `{ min_birth_date: "1990-01-01", max_birth_date: "2000-12-31" }`
+    PF --> SF
+    SF --> RS
+    SF --> MS
+    SF --> DP
 
-### 3. Multi-Select Array Filters
-Fields with `string[]` arrays use `MultiSelect` component:
-- Multi-select combobox with search functionality
-- Badge display for selected items with remove buttons
-- Supports both single and multiple selections
-- Nullable design - can be completely empty
-- Intelligent storage: single string for one item, array for multiple
-- Example: `{ source: "kueba" }` or `{ source: ["kueba", "erp"] }`
+    SF --> CRITERIA
+    SF --> FILTER
 
-### 4. String Range Filters
-Fields with `{ min: string, max: string }` (non-date):
-- Two text input fields for min/max string values
-- Useful for postal codes, alphanumeric ranges
-- Example: postal code ranges like `{ min_plz: "10000", max_plz: "99999" }`
+    SF --> RANGE
+    SF --> EXACT
+    SF --> MULTI
+    SF --> DATE
 
-## API Integration
+    SF --> TRANSFORM
+    TRANSFORM --> FILTER
 
-The SearchFilter component integrates with two API endpoints to provide dynamic filtering capabilities.
+    style PF fill:#e8f5e8
+    style SF fill:#e1f5fe
+    style RS fill:#fff3e0
+    style MS fill:#fff3e0
+    style DP fill:#fff3e0
+    style CRITERIA fill:#f3e5f5
+    style FILTER fill:#f3e5f5
+    style RANGE fill:#e8f5e8
+    style EXACT fill:#e8f5e8
+    style MULTI fill:#e8f5e8
+    style DATE fill:#e8f5e8
+    style TRANSFORM fill:#ffebee
+```
 
-### Search Criteria Endpoint
+## Komponenten
+
+### Hauptkomponenten
+- `SearchFilter` (`~/components/ui/search-filter.tsx`) - Generische Such-Filter Komponente
+- `ProspectFilter` (`~/components/prospect-filter.tsx`) - Interessenten-spezifische Implementierung
+- `RangeSlider` (`~/components/ui/range-slider.tsx`) - Doppelgriff-Slider für Min/Max-Werte
+- `MultiSelect` (`~/components/ui/multi-select.tsx`) - Mehrfachauswahl-Combobox mit Badges
+
+### Unterstützende Komponenten
+- `Slider` (`~/components/ui/slider.tsx`) - Basis Radix UI Slider mit doppelten Daumen für Bereichsauswahl
+- `Badge` (`~/components/ui/badge.tsx`) - Anzeige-Komponente für ausgewählte Elemente
+- `DatePicker` (`~/components/ui/date-picker.tsx`) - Datumsauswahl-Komponente für Datumsbereiche
+
+## Filter-Typen
+
+Die SearchFilter-Komponente erkennt automatisch und rendert entsprechende UI-Steuerelemente basierend auf dem Datentyp von der Suchkriterien-API.
+
+### 1. Numerische Bereichsfilter
+Felder mit `{ min: number, max: number }` Format unterstützen zwei interaktive Modi:
+
+**Bereichsmodus (Standard)**
+- Doppelgriff `RangeSlider` Komponente für visuelle Bereichsauswahl
+- Synchronisierte Min/Max-Eingabefelder für präzise numerische Eingabe
+- Automatische Validierung zur Verhinderung von Min > Max
+- Beispiel: `{ min_age: 25, max_age: 65 }`
+
+**Exaktwert-Modus**
+- Einzelne Zahleneingabe für exakte Übereinstimmungen
+- Radio-Button-Umschaltung zwischen Modi
+- Modus-Status verfolgt mit `{field}_mode` Schlüssel
+- Beispiel: `{ age: 30, age_mode: "exact" }`
+
+### 2. Datumsbereichsfilter
+Felder mit `{ min: string, max: string }` wobei der Feldname "date" enthält:
+- Zwei `DatePicker` Komponenten für Start-/Enddaten
+- ISO-Datums-String-Verarbeitung mit ordnungsgemäßer Formatierung
+- Beispiel: `{ min_birth_date: "1990-01-01", max_birth_date: "2000-12-31" }`
+
+### 3. Mehrfachauswahl-Array-Filter
+Felder mit `string[]` Arrays verwenden `MultiSelect` Komponente:
+- Mehrfachauswahl-Combobox mit Suchfunktionalität
+- Badge-Anzeige für ausgewählte Elemente mit Entfernen-Buttons
+- Unterstützt sowohl Einzel- als auch Mehrfachauswahlen
+- Nullable Design - kann vollständig leer sein
+- Intelligente Speicherung: Einzelner String für ein Element, Array für mehrere
+- Beispiel: `{ source: "kueba" }` oder `{ source: ["kueba", "erp"] }`
+
+## API-Integration
+
+Die SearchFilter-Komponente integriert sich mit zwei API-Endpunkten, um dynamische Filterfunktionen bereitzustellen.
+
+### Suchkriterien-Endpunkt
 ```typescript
 GET /api/prospects/search-criteria
 ```
 
-Returns available filter criteria with data ranges and options:
+Gibt verfügbare Filterkriterien mit Datenbereichen und Optionen zurück:
 ```json
 {
   "age": { "min": 22, "max": 80 },
@@ -96,12 +162,12 @@ Returns available filter criteria with data ranges and options:
 }
 ```
 
-### Filter Count Endpoint (Optional)
+### Filter-Zählung-Endpunkt (Optional)
 ```typescript
 GET /api/prospects/filter?params...
 ```
 
-When `showCount={true}`, provides real-time count of matching records:
+Wenn `showCount={true}`, stellt Echtzeit-Zählung der übereinstimmenden Datensätze bereit:
 ```json
 {
   "data": [...],
@@ -114,17 +180,17 @@ When `showCount={true}`, provides real-time count of matching records:
 }
 ```
 
-Count requests are:
-- Debounced by 500ms to avoid excessive API calls
-- Include `per_page: 1` to minimize data transfer
-- Only sent when filters have values
+Zählanfragen sind:
+- Um 500ms entprellt, um übermäßige API-Aufrufe zu vermeiden
+- Enthalten `per_page: 1` zur Minimierung der Datenübertragung
+- Werden nur gesendet, wenn Filter Werte haben
 
-## Filter Data Transformation
+## Filter-Datentransformation
 
-The SearchFilter component uses a flat internal format for form state management and transforms data appropriately when sending to APIs.
+Die SearchFilter-Komponente verwendet ein flaches internes Format für die Formular-Zustandsverwaltung und transformiert Daten entsprechend beim Senden an APIs.
 
-### Internal Format (Form State)
-The component stores all filter values in a flattened structure:
+### Internes Format (Formular-Zustand)
+Die Komponente speichert alle Filterwerte in einer abgeflachten Struktur:
 ```typescript
 {
   // Numeric range filters (when in range mode)
@@ -149,8 +215,8 @@ The component stores all filter values in a flattened structure:
 }
 ```
 
-### API Query Parameters Format
-When sending filter counts or actual filter requests, the component transforms the internal format:
+### API-Query-Parameter-Format
+Beim Senden von Filter-Zählungen oder tatsächlichen Filter-Anfragen transformiert die Komponente das interne Format:
 
 ```typescript
 // Internal to query params transformation:
@@ -165,16 +231,16 @@ When sending filter counts or actual filter requests, the component transforms t
 }
 ```
 
-The `transformFilterToQueryParams()` function handles:
-- Filtering out null/undefined/empty values
-- Converting arrays to `{field}_in[]` format for backend processing
-- Excluding mode tracking fields (`*_mode`)
-- Preserving min/max prefixes for range queries
+Die `transformFilterToQueryParams()` Funktion verarbeitet:
+- Herausfiltern von null/undefined/leeren Werten
+- Konvertierung von Arrays in `{field}_in[]` Format für Backend-Verarbeitung
+- Ausschluss von Modus-Tracking-Feldern (`*_mode`)
+- Beibehaltung von Min/Max-Präfixen für Bereichsabfragen
 
-## Usage
+## Verwendung
 
-### ProspectFilter Component (Recommended)
-The `ProspectFilter` component is a pre-configured wrapper for prospect data:
+### ProspectFilter Komponente (Empfohlen)
+Die `ProspectFilter` Komponente ist ein vorkonfigurierter Wrapper für Interessenten-Daten:
 
 ```tsx
 import { ProspectFilter } from "~/components/prospect-filter"
@@ -194,8 +260,8 @@ function MyComponent() {
 }
 ```
 
-### Generic SearchFilter Component
-For custom implementations or other data types:
+### Generische SearchFilter Komponente
+Für benutzerdefinierte Implementierungen oder andere Datentypen:
 
 ```tsx
 import { SearchFilter, type FilterValue } from "~/components/ui/search-filter"
@@ -219,8 +285,8 @@ const fieldLabels = {
 />
 ```
 
-### Campaign Form Integration
-In campaign forms, the ProspectFilter is integrated as part of the form data:
+### Kampagnen-Formular Integration
+In Kampagnen-Formularen wird der ProspectFilter als Teil der Formulardaten integriert:
 
 ```tsx
 import { ProspectFilter } from "~/components/prospect-filter"
@@ -258,34 +324,34 @@ export default function CampaignForm() {
 }
 ```
 
-## Features
+## Funktionen
 
-### Real-time Filter Count
-- **Debounced API calls**: 500ms delay prevents excessive server requests
-- **Live updates**: Shows total matching records as filters change
-- **Smart filtering**: Only sends API requests when filters have actual values
-- **Loading states**: Visual feedback during count fetching
+### Echtzeit-Filter-Zählung
+- **Entprellte API-Aufrufe**: 500ms Verzögerung verhindert übermäßige Server-Anfragen
+- **Live-Updates**: Zeigt Gesamtzahl der übereinstimmenden Datensätze bei Filteränderungen
+- **Intelligente Filterung**: Sendet nur API-Anfragen, wenn Filter tatsächliche Werte haben
+- **Ladezustände**: Visuelles Feedback während der Zählung
 
-### Flexible Filter Modes
-- **Nullable design**: All filters start empty and can be cleared completely
-- **Dual-mode numeric**: Range sliders OR exact value input with radio toggle
-- **Smart multi-select**: Single strings for one item, arrays for multiple
-- **Mode persistence**: Remembers user's choice between range/exact modes
+### Flexible Filter-Modi
+- **Nullable Design**: Alle Filter beginnen leer und können vollständig gelöscht werden
+- **Dual-Modus numerisch**: Bereichs-Slider ODER exakte Werteingabe mit Radio-Umschaltung
+- **Intelligente Mehrfachauswahl**: Einzelne Strings für ein Element, Arrays für mehrere
+- **Modus-Persistenz**: Merkt sich Benutzerauswahl zwischen Bereichs-/Exakt-Modi
 
-### Intelligent Data Handling
-- **Type detection**: Automatically renders appropriate controls based on API data
-- **Validation**: Min/max constraints on numeric inputs prevent invalid ranges  
-- **Clean state**: Removes null/undefined values to keep filter object minimal
-- **Dot notation**: Supports nested field names like `address.city`
+### Intelligente Datenverarbeitung
+- **Typerkennung**: Rendert automatisch entsprechende Steuerelemente basierend auf API-Daten
+- **Validierung**: Min/Max-Beschränkungen bei numerischen Eingaben verhindern ungültige Bereiche
+- **Sauberer Zustand**: Entfernt null/undefined-Werte, um Filter-Objekt minimal zu halten
+- **Punkt-Notation**: Unterstützt verschachtelte Feldnamen wie `address.city`
 
-### User Experience
-- **Visual feedback**: RangeSlider with dual thumbs and synchronized inputs  
-- **Search capability**: Multi-select dropdowns include search functionality
-- **Badge interface**: Selected items displayed as removable badges
-- **Loading states**: Skeleton loading during initial criteria fetch
-- **Error handling**: Graceful fallbacks when API requests fail
+### Benutzererfahrung
+- **Visuelles Feedback**: RangeSlider mit doppelten Daumen und synchronisierten Eingaben
+- **Suchfähigkeit**: Mehrfachauswahl-Dropdowns enthalten Suchfunktionalität
+- **Badge-Interface**: Ausgewählte Elemente als entfernbare Badges angezeigt
+- **Ladezustände**: Skeleton-Loading während des anfänglichen Kriterien-Abrufs
+- **Fehlerbehandlung**: Elegante Fallbacks bei fehlschlagenden API-Anfragen
 
-## File Structure
+## Dateistruktur
 
 ```
 app/
@@ -307,21 +373,21 @@ app/
 │   └── utils.ts                    # Utility functions (cn, etc.)
 ```
 
-## Component Architecture
+## Komponenten-Architektur
 
-### SearchFilter (Generic Component)
-**Location**: `~/components/ui/search-filter.tsx`
+### SearchFilter (Generische Komponente)
+**Standort**: `~/components/ui/search-filter.tsx`
 
-**Key Functions**:
-- `fetchSearchCriteria()` - Loads available filter options from API
-- `fetchFilterCount()` - Gets real-time count with debouncing
-- `transformFilterToQueryParams()` - Converts internal state to API format
-- `renderRangeField()` - Renders numeric fields with dual modes
-- `renderDateRangeField()` - Renders date range pickers
-- `renderArrayField()` - Renders multi-select dropdowns
-- `renderStringRangeField()` - Renders string min/max inputs
+**Hauptfunktionen**:
+- `fetchSearchCriteria()` - Lädt verfügbare Filteroptionen von API
+- `fetchFilterCount()` - Erhält Echtzeit-Zählung mit Entprellung
+- `transformFilterToQueryParams()` - Konvertiert internen Zustand in API-Format
+- `renderRangeField()` - Rendert numerische Felder mit dualen Modi
+- `renderDateRangeField()` - Rendert Datumsbereich-Picker
+- `renderArrayField()` - Rendert Mehrfachauswahl-Dropdowns
+- `renderStringRangeField()` - Rendert String Min/Max-Eingaben
 
-**State Management**:
+**Zustandsverwaltung**:
 ```typescript
 const [searchCriteria, setSearchCriteria] = useState<SearchCriteriaResponse | null>(null)
 const [loading, setLoading] = useState(true)
@@ -329,46 +395,46 @@ const [filterCount, setFilterCount] = useState<number | null>(null)
 const [countLoading, setCountLoading] = useState(false)
 ```
 
-### ProspectFilter (Specialized Wrapper)
-**Location**: `~/components/prospect-filter.tsx`
+### ProspectFilter (Spezialisierter Wrapper)
+**Standort**: `~/components/prospect-filter.tsx`
 
-Pre-configured with:
-- Endpoint: `/api/prospects/search-criteria`
-- Filter endpoint: `/api/prospects/filter`
-- Field labels for all prospect attributes
-- TypeScript integration with `ProspectFilter` interface
+Vorkonfiguriert mit:
+- Endpunkt: `/api/prospects/search-criteria`
+- Filter-Endpunkt: `/api/prospects/filter`
+- Feldbezeichnungen für alle Interessenten-Attribute
+- TypeScript-Integration mit `ProspectFilter` Interface
 
 ## Best Practices
 
-### Implementation Guidelines
+### Implementierungs-Richtlinien
 
-1. **Field Naming Conventions**
-   - Use `min_` and `max_` prefixes for range fields
-   - Use dot notation for nested fields (`address.city`)
-   - Keep field names consistent between API and frontend
+1. **Feld-Namenskonventionen**
+   - Verwende `min_` und `max_` Präfixe für Bereichsfelder
+   - Verwende Punkt-Notation für verschachtelte Felder (`address.city`)
+   - Halte Feldnamen zwischen API und Frontend konsistent
 
-2. **Nullable Design Philosophy**
-   - All filters start empty and remain optional
-   - Users can clear any filter completely
-   - Empty filters are excluded from API requests
+2. **Nullable Design-Philosophie**
+   - Alle Filter beginnen leer und bleiben optional
+   - Benutzer können jeden Filter vollständig löschen
+   - Leere Filter werden von API-Anfragen ausgeschlossen
 
-3. **Performance Optimization**
-   - Debounce API calls (500ms for count requests)
-   - Only send non-empty values to reduce payload size
-   - Use `per_page: 1` for count-only requests
+3. **Performance-Optimierung**
+   - Entprelle API-Aufrufe (500ms für Zählanfragen)
+   - Sende nur nicht-leere Werte zur Reduzierung der Payload-Größe
+   - Verwende `per_page: 1` für reine Zählanfragen
 
-4. **Type Safety**
-   - Define proper TypeScript interfaces for filter data
-   - Use generic `FilterValue` type for reusability
-   - Maintain type consistency between components
+4. **Typsicherheit**
+   - Definiere ordnungsgemäße TypeScript-Interfaces für Filterdaten
+   - Verwende generischen `FilterValue` Typ für Wiederverwendbarkeit
+   - Erhalte Typkonsistenz zwischen Komponenten
 
-5. **User Experience**
-   - Provide clear visual feedback for loading states
-   - Handle API errors gracefully with fallback messages
-   - Include proper labels and accessibility attributes
-   - Support keyboard navigation for all interactive elements
+5. **Benutzererfahrung**
+   - Stelle klares visuelles Feedback für Ladezustände bereit
+   - Behandle API-Fehler elegant mit Fallback-Nachrichten
+   - Inkludiere ordnungsgemäße Labels und Barrierefreiheits-Attribute
+   - Unterstütze Tastaturnavigation für alle interaktiven Elemente
 
-### Common Patterns
+### Allgemeine Muster
 
 ```typescript
 // Proper filter state initialization
@@ -388,9 +454,9 @@ const handleFilterChange = (newFilters: ProspectFilter) => {
 />
 ```
 
-## Integration with Form Systems
+## Integration mit Formular-Systemen
 
-The SearchFilter components are designed to work seamlessly with form libraries and validation systems:
+Die SearchFilter-Komponenten sind darauf ausgelegt, nahtlos mit Formular-Bibliotheken und Validierungssystemen zu arbeiten:
 
 ```typescript
 // With useFormWithValidation hook
@@ -408,9 +474,9 @@ const { formData, updateFormData } = useFormWithValidation({
 />
 ```
 
-## Known Limitations
+## Bekannte Einschränkungen
 
-1. **Date Field Detection**: Currently uses simple string matching for "date" in field names
-2. **Field Validation**: Basic min/max validation only; no custom validation rules
-3. **Mobile Optimization**: Range sliders may need touch improvements on small screens
-4. **Complex Operators**: Only supports basic equals/range operations, not "contains" or "starts with"
+1. **Datumsfeld-Erkennung**: Verwendet derzeit einfache String-Übereinstimmung für "date" in Feldnamen
+2. **Feld-Validierung**: Nur grundlegende Min/Max-Validierung; keine benutzerdefinierten Validierungsregeln
+3. **Mobile Optimierung**: Bereichs-Slider benötigen möglicherweise Touch-Verbesserungen auf kleinen Bildschirmen
+4. **Komplexe Operatoren**: Unterstützt nur grundlegende Gleich/Bereich-Operationen, nicht "enthält" oder "beginnt mit"

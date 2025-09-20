@@ -1,24 +1,24 @@
 # Landing Page System
 
-A dynamic, section-based landing page system that creates responsive, visually appealing campaign pages with flexible content layouts and smart fallback handling for missing data.
+Ein dynamisches, sektionsbasiertes Landing Page System, das responsive, visuell ansprechende Kampagnenseiten mit flexiblen Inhaltslayouts und intelligenter Fallback-Behandlung für fehlende Daten erstellt.
 
-## Overview
+## Übersicht
 
-The landing page system consists of three main components:
-1. **Public Landing Page Route** (`/landingpage/{slug}`) - The user-facing campaign page
-2. **Admin Form Interface** - For creating and editing landing pages with sections
-3. **Dynamic Section Rendering** - Intelligent layout system that adapts to available content
+Das Landing Page System besteht aus drei Hauptkomponenten:
+1. **Öffentliche Landing Page Route** (`/landingpage/{slug}`) - Die benutzerseitige Kampagnenseite
+2. **Admin-Formular-Interface** - Zum Erstellen und Bearbeiten von Landing Pages mit Sektionen
+3. **Dynamisches Sektions-Rendering** - Intelligentes Layout-System, das sich an verfügbare Inhalte anpasst
 
-### Key Features
+### Hauptfunktionen
 
-- **Responsive Design**: Mobile-first layouts with desktop enhancements
-- **Dynamic Section Types**: Hero, alternating features, image-only sections
-- **Smart Fallbacks**: Graceful handling of missing images, text, or CTAs
-- **SEO-Friendly**: Proper meta tags and semantic HTML structure
-- **Loading States**: Beautiful loading animations and error handling
-- **Accessibility**: ARIA labels, keyboard navigation, and proper contrast
+- **Responsive Design**: Mobile-First-Layouts mit Desktop-Verbesserungen
+- **Dynamische Sektions-Typen**: Hero, wechselnde Features, reine Bild-Sektionen
+- **Intelligente Fallbacks**: Elegante Behandlung fehlender Bilder, Texte oder CTAs
+- **SEO-freundlich**: Ordnungsgemäße Meta-Tags und semantische HTML-Struktur
+- **Ladezustände**: Schöne Lade-Animationen und Fehlerbehandlung
+- **Barrierefreiheit**: ARIA-Labels, Tastaturnavigation und ordnungsgemäße Kontraste
 
-## Data Structure
+## Datenstruktur
 
 ### Landing Page Schema
 
@@ -39,9 +39,9 @@ interface LandingpageSection {
 }
 ```
 
-### Campaign Integration
+### Kampagnen-Integration
 
-Landing pages are linked to campaigns via the `PublicCampaignData` interface:
+Landing Pages sind über das `PublicCampaignData` Interface mit Kampagnen verknüpft:
 
 ```typescript
 interface PublicCampaignData {
@@ -53,24 +53,24 @@ interface PublicCampaignData {
 }
 ```
 
-## Section Types and Rendering
+## Sektions-Typen und Rendering
 
-The system intelligently renders different section layouts based on content availability and section position:
+Das System rendert intelligent verschiedene Sektions-Layouts basierend auf Inhaltsverfügbarkeit und Sektions-Position:
 
-### 1. Hero Content Section (First Section)
+### 1. Hero-Inhalts-Sektion (Erste Sektion)
 
-**Characteristics:**
-- Always centered layout
-- Larger image container (max-height: 500px)
-- Primary CTA styling with gradient and animations
-- Larger text treatment
+**Eigenschaften:**
+- Immer zentriertes Layout
+- Größerer Bild-Container (max-height: 500px)
+- Primäres CTA-Styling mit Verlauf und Animationen
+- Größere Text-Behandlung
 
-**Rendered when:** `index === 0`
+**Gerendert wenn:** `index === 0`
 
-**Visual Elements:**
-- **Image**: Centered with decorative background gradient and shadow
-- **Text**: Prose styling with paragraph breaks, larger font size
-- **CTA**: Large emerald gradient button with hover animations
+**Visuelle Elemente:**
+- **Bild**: Zentriert mit dekorativem Hintergrund-Verlauf und Schatten
+- **Text**: Prose-Styling mit Absatz-Umbrüchen, größere Schriftgröße
+- **CTA**: Großer smaragdgrüner Verlaufs-Button mit Hover-Animationen
 
 ```typescript
 // Hero section example
@@ -82,24 +82,24 @@ The system intelligently renders different section layouts based on content avai
 }
 ```
 
-### 2. Alternating Feature Sections (With Text)
+### 2. Wechselnde Feature-Sektionen (Mit Text)
 
-**Characteristics:**
-- Two-column grid layout on desktop
-- Alternating left/right image placement
-- Medium image size (max-height: 400px)
-- Secondary CTA styling
+**Eigenschaften:**
+- Zweispaltiges Grid-Layout auf Desktop
+- Wechselnde Links/Rechts-Bild-Platzierung
+- Mittlere Bildgröße (max-height: 400px)
+- Sekundäres CTA-Styling
 
-**Rendered when:** `index > 0 && section.text` (has text content)
+**Gerendert wenn:** `index > 0 && section.text` (hat Text-Inhalt)
 
-**Layout Pattern:**
-- **Odd sections** (index % 2 === 1): Image right, text left, right-aligned
-- **Even sections**: Image left, text right, left-aligned
+**Layout-Muster:**
+- **Ungerade Sektionen** (index % 2 === 1): Bild rechts, Text links, rechtsbündig
+- **Gerade Sektionen**: Bild links, Text rechts, linksbündig
 
-**Visual Elements:**
-- **Image**: Decorative rotation effects that straighten on hover
-- **Text**: Paragraph breaks with responsive alignment
-- **CTA**: Smaller dark gray buttons with external link icons
+**Visuelle Elemente:**
+- **Bild**: Dekorative Rotations-Effekte, die sich bei Hover begradigen
+- **Text**: Absatz-Umbrüche mit responsiver Ausrichtung
+- **CTA**: Kleinere dunkelgraue Buttons mit externen Link-Icons
 
 ```typescript
 // Feature section example
@@ -111,19 +111,19 @@ The system intelligently renders different section layouts based on content avai
 }
 ```
 
-### 3. Image-Only Sections (Without Text)
+### 3. Reine Bild-Sektionen (Ohne Text)
 
-**Characteristics:**
-- Centered layout with emphasis on image
-- Larger image container (max-height: 600px)
-- Enhanced hover effects
-- Primary CTA styling
+**Eigenschaften:**
+- Zentriertes Layout mit Fokus auf Bild
+- Größerer Bild-Container (max-height: 600px)
+- Erweiterte Hover-Effekte
+- Primäres CTA-Styling
 
-**Rendered when:** `index > 0 && !section.text` (no text content)
+**Gerendert wenn:** `index > 0 && !section.text` (kein Text-Inhalt)
 
-**Visual Elements:**
-- **Image**: Centered with scale hover effects and gradient background
-- **CTA**: Primary emerald button styling matching hero section
+**Visuelle Elemente:**
+- **Bild**: Zentriert mit Skalierungs-Hover-Effekten und Verlaufs-Hintergrund
+- **CTA**: Primäres smaragdgrünes Button-Styling passend zur Hero-Sektion
 
 ```typescript
 // Image-only section example  
@@ -135,14 +135,14 @@ The system intelligently renders different section layouts based on content avai
 }
 ```
 
-## Missing Data Handling
+## Fehlende Daten Behandlung
 
-The system gracefully handles missing or empty content with intelligent fallbacks:
+Das System behandelt fehlende oder leere Inhalte elegant mit intelligenten Fallbacks:
 
-### Missing Images
+### Fehlende Bilder
 
-**Behavior:** Section continues to render without image container
-**Impact:** Text takes full width, maintains proper spacing
+**Verhalten:** Sektion wird weiterhin ohne Bild-Container gerendert
+**Auswirkung:** Text nimmt volle Breite ein, behält ordnungsgemäße Abstände
 
 ```typescript
 // Section with missing image
@@ -154,12 +154,12 @@ The system gracefully handles missing or empty content with intelligent fallback
 }
 ```
 
-**Result:** Content flows naturally without broken image placeholders
+**Ergebnis:** Inhalt fließt natürlich ohne kaputte Bild-Platzhalter
 
-### Missing Text Content
+### Fehlender Text-Inhalt
 
-**Behavior:** Triggers image-only layout mode
-**Impact:** Image becomes focal point with enhanced styling
+**Verhalten:** Löst reinen Bild-Layout-Modus aus
+**Auswirkung:** Bild wird zum Fokuspunkt mit verbessertem Styling
 
 ```typescript
 // Section with missing text
@@ -171,12 +171,12 @@ The system gracefully handles missing or empty content with intelligent fallback
 }
 ```
 
-**Result:** Centered image with prominent CTA button below
+**Ergebnis:** Zentriertes Bild mit prominentem CTA-Button darunter
 
-### Missing CTA Elements
+### Fehlende CTA-Elemente
 
-**Behavior:** Section renders without call-to-action button
-**Impact:** Content flows naturally without empty button space
+**Verhalten:** Sektion wird ohne Call-to-Action-Button gerendert
+**Auswirkung:** Inhalt fließt natürlich ohne leeren Button-Platz
 
 ```typescript
 // Section with no CTA
@@ -188,126 +188,126 @@ The system gracefully handles missing or empty content with intelligent fallback
 }
 ```
 
-**Result:** Clean content presentation focused on information delivery
+**Ergebnis:** Saubere Inhalts-Präsentation fokussiert auf Informationsvermittlung
 
-### Complete Section Fallbacks
+### Vollständige Sektions-Fallbacks
 
-**Empty Sections:** If all fields are empty, section still renders with proper spacing
-**Maintains Layout:** Preserves visual rhythm and prevents layout collapse
+**Leere Sektionen:** Wenn alle Felder leer sind, wird die Sektion trotzdem mit ordnungsgemäßen Abständen gerendert
+**Layout-Erhaltung:** Bewahrt visuellen Rhythmus und verhindert Layout-Kollaps
 
 ## Mobile Responsive Design
 
-The landing page system is built mobile-first with progressive enhancement:
+Das Landing Page System ist Mobile-First mit progressiver Verbesserung gebaut:
 
 ### Mobile Layout (< 768px)
 
-**Hero Section:**
+**Hero-Sektion:**
 ```css
-/* Mobile hero adjustments */
-- Single column layout
-- Reduced padding: py-20 (instead of py-28)  
-- Smaller headline: text-5xl (consistent across breakpoints)
-- Stack image above text
-- Full-width CTA buttons
+/* Mobile Hero-Anpassungen */
+- Einspalten-Layout
+- Reduziertes Padding: py-20 (anstatt py-28)
+- Kleinere Überschrift: text-5xl (konsistent über Breakpoints)
+- Bild über Text stapeln
+- Vollbreite CTA-Buttons
 ```
 
-**Feature Sections:**
+**Feature-Sektionen:**
 ```css
-/* Mobile feature layout */
-- Single column stack (grid disabled)
-- Images above text content
-- Center-aligned text (overrides lg:text-left/right)
-- Full-width images with reduced max-height
-- Touch-friendly button sizing
+/* Mobile Feature-Layout */
+- Einspalten-Stapel (Grid deaktiviert)
+- Bilder über Text-Inhalt
+- Zentrierter Text (überschreibt lg:text-left/right)
+- Vollbreite Bilder mit reduzierter Max-Höhe
+- Touch-freundliche Button-Größen
 ```
 
-**Image Handling:**
+**Bild-Behandlung:**
 ```css
-/* Mobile image optimizations */
-- object-fit: cover maintains aspect ratio
-- Reduced max-heights for better screen utilization
-- Enhanced touch targets for interactive elements
+/* Mobile Bild-Optimierungen */
+- object-fit: cover erhält Seitenverhältnis
+- Reduzierte Max-Höhen für bessere Bildschirm-Nutzung
+- Erweiterte Touch-Ziele für interaktive Elemente
 ```
 
 ### Tablet Layout (768px - 1023px)
 
-**Grid System:**
+**Grid-System:**
 ```css
-/* Tablet grid behavior */
-- Two-column grid starts at 768px (lg: breakpoint)
-- Images maintain alternating positions
-- Text alignment switches based on image position
-- Improved spacing between columns (gap-16)
+/* Tablet Grid-Verhalten */
+- Zweispalten-Grid beginnt bei 768px (lg: Breakpoint)
+- Bilder behalten wechselnde Positionen
+- Text-Ausrichtung wechselt basierend auf Bild-Position
+- Verbesserte Abstände zwischen Spalten (gap-16)
 ```
 
 ### Desktop Layout (1024px+)
 
-**Enhanced Features:**
+**Erweiterte Funktionen:**
 ```css
-/* Desktop enhancements */
-- Full alternating layout with rotations
-- Hover effects on images (scale, rotation)
-- Enhanced button animations (-translate-y)
-- Maximum content width constraints (max-w-7xl)
+/* Desktop-Verbesserungen */
+- Vollständiges wechselndes Layout mit Rotationen
+- Hover-Effekte auf Bilder (Skalierung, Rotation)
+- Erweiterte Button-Animationen (-translate-y)
+- Maximale Inhaltsbreiten-Beschränkungen (max-w-7xl)
 ```
 
-### Touch and Hover States
+### Touch- und Hover-Zustände
 
-**Mobile Considerations:**
-- Hover effects still present but don't interfere with touch
-- Touch-friendly button sizes (min-height via padding)
-- Proper focus states for accessibility
+**Mobile-Überlegungen:**
+- Hover-Effekte noch vorhanden, aber stören Touch nicht
+- Touch-freundliche Button-Größen (Min-Höhe via Padding)
+- Ordnungsgemäße Fokus-Zustände für Barrierefreiheit
 
-**Interactive Elements:**
+**Interaktive Elemente:**
 ```css
-/* Touch-friendly interactions */
-- Button min-touch-size: 44px (via py-6 px-12)
-- Image hover states work on desktop hover
-- Transform animations optimized for mobile performance
+/* Touch-freundliche Interaktionen */
+- Button Min-Touch-Größe: 44px (via py-6 px-12)
+- Bild-Hover-Zustände funktionieren bei Desktop-Hover
+- Transform-Animationen für Mobile-Performance optimiert
 ```
 
-## Loading and Error States
+## Lade- und Fehlerzustände
 
-### Loading State
+### Ladezustand
 
-**Design:** Elegant loading animation with branded colors
+**Design:** Elegante Lade-Animation mit Markenfarben
 
 ```typescript
-// Loading state features
-- Gradient background (slate-50 to emerald-50 to teal-100)
-- Dual-ring spinning animation with emerald colors
-- Animated text: "Loading your experience..."
-- Three-dot bounce animation with staggered delays
-- Consistent with brand color palette
+// Ladezustand-Funktionen
+- Verlaufs-Hintergrund (slate-50 zu emerald-50 zu teal-100)
+- Doppelring-Dreh-Animation mit smaragdgrünen Farben
+- Animierter Text: "Loading your experience..."
+- Drei-Punkt-Sprung-Animation mit gestaffelten Verzögerungen
+- Konsistent mit Marken-Farbpalette
 ```
 
-**Mobile Adaptation:**
-- Full viewport height (min-h-screen)
-- Centered content with proper padding
-- Responsive text sizing
+**Mobile-Anpassung:**
+- Vollständige Viewport-Höhe (min-h-screen)
+- Zentrierter Inhalt mit ordnungsgemäßem Padding
+- Responsive Text-Größen
 
-### Error State
+### Fehlerzustand
 
-**Design:** Friendly error message with recovery options
+**Design:** Freundliche Fehlermeldung mit Wiederherstellungsoptionen
 
 ```typescript
-// Error state features  
-- Warm gradient background (rose-50 to amber-50)
-- Warning icon in rose color scheme
-- Clear error messaging with fallback text
-- "Try Again" button for recovery
-- Alternative suggestion text
+// Fehlerzustand-Funktionen
+- Warmer Verlaufs-Hintergrund (rose-50 zu amber-50)
+- Warn-Icon in Rose-Farbschema
+- Klare Fehlermeldungen mit Fallback-Text
+- "Erneut versuchen" Button zur Wiederherstellung
+- Alternative Vorschlags-Texte
 ```
 
-**Error Handling:**
-- Network failures: "Failed to load. Please try again later."
-- Not found: "The campaign you're looking for could not be found"
-- Generic fallback for unknown errors
-- Reload functionality via window.location.reload()
+**Fehlerbehandlung:**
+- Netzwerk-Fehler: "Laden fehlgeschlagen. Bitte versuchen Sie es später erneut."
+- Nicht gefunden: "Die gesuchte Kampagne konnte nicht gefunden werden"
+- Generisches Fallback für unbekannte Fehler
+- Neuladen-Funktionalität via window.location.reload()
 
-## SEO and Accessibility
+## SEO und Barrierefreiheit
 
-### Meta Tags
+### Meta-Tags
 
 ```typescript
 // Dynamic meta generation
@@ -319,24 +319,24 @@ export function meta({ params }: Route.MetaArgs) {
 }
 ```
 
-### Accessibility Features
+### Barrierefreiheits-Funktionen
 
-**ARIA Labels:**
+**ARIA-Labels:**
 ```typescript
-// CTA button accessibility
+// CTA-Button-Barrierefreiheit
 aria-label={`${section.cta_text} - ${data.title}`}
 ```
 
-**Semantic HTML:**
-- Proper heading hierarchy (h1, h2)
-- Semantic footer element
-- Descriptive alt text for images
-- Proper link relationships (target="_blank" with rel="noopener noreferrer")
+**Semantisches HTML:**
+- Ordnungsgemäße Überschriften-Hierarchie (h1, h2)
+- Semantisches Footer-Element
+- Beschreibender Alt-Text für Bilder
+- Ordnungsgemäße Link-Beziehungen (target="_blank" mit rel="noopener noreferrer")
 
-**Focus Management:**
-- Visible focus states on all interactive elements
-- Keyboard navigation support
-- Proper color contrast ratios
+**Fokus-Management:**
+- Sichtbare Fokus-Zustände auf allen interaktiven Elementen
+- Tastaturnavigation-Unterstützung
+- Ordnungsgemäße Farb-Kontrast-Verhältnisse
 
 ## Performance Optimizations
 
@@ -377,18 +377,17 @@ aria-label={`${section.cta_text} - ${data.title}`}
 - Proper loading state management
 - No unnecessary re-renders during loading
 ```
+## API-Integration
 
-## API Integration
-
-### Public Campaign Endpoint
+### Öffentlicher Kampagnen-Endpunkt
 
 **Endpoint:** `GET /api/cp/{slug}`
 
-**Parameters:**
-- `slug`: Campaign URL slug
-- Query parameters passed through from URL
+**Parameter:**
+- `slug`: Kampagnen-URL-Slug
+- Query-Parameter, die über die URL weitergereicht werden
 
-**Response Format:**
+**Antwortformat:**
 ```typescript
 interface PublicCampaignResponse {
   data: {
@@ -406,302 +405,83 @@ interface PublicCampaignResponse {
 }
 ```
 
-### URL Parameter Handling
+### URL-Parameter-Verarbeitung
 
-The landing page system is designed to forward all tracking parameters to the backend, enabling comprehensive analytics and prospect tracking for campaign performance measurement.
+Das Landingpage-System ist so konzipiert, dass alle Tracking-Parameter an das Backend weitergeleitet werden. Dadurch sind umfassende Analysen und ein detailliertes Prospect-Tracking zur Erfolgsmessung von Kampagnen möglich.
 
-**Query String Support:**
+**Query-String-Unterstützung:**
 ```typescript
-// URL parameters are passed through to API
+// URL-Parameter werden an die API weitergereicht
 const queryString = searchParams.toString()
 const url = queryString ? `/api/cp/${slug}?${queryString}` : `/api/cp/${slug}`
 ```
 
-**Prospect Tracking Architecture:**
+**Prospect-Tracking-Architektur:**
 
-The system supports complete email-to-landing page tracking workflows. When prospects receive campaign emails, the CTA links include comprehensive tracking parameters that are forwarded to the backend for analytics processing.
+Das System unterstützt vollständige Workflows vom E-Mail-Versand bis zur Landingpage. Wenn Prospects Kampagnen-E-Mails erhalten, enthalten die CTA-Links Tracking-Parameter, die an das Backend weitergegeben und für Analysen verarbeitet werden.
 
-**Standard URL Schema:**
+**Standard-URL-Schema:**
 ```
 {{URL}}/api/cp/{campaign-slug}?prospect={prospect-id}&utm_source={source}&utm_medium={medium}&utm_campaign={campaign-id}&utm_content={content}&utm_term={term}&gclid={google-click-id}&fbclid={facebook-click-id}
 ```
 
-**Real Example:**
+**Reales Beispiel:**
 ```
 https://example.com/api/cp/reprehenderit-ut-optio-autem?prospect=68a36940d7f5370a25055570&utm_source=mail&utm_medium=web&utm_campaign=686a3affca7748f6b807cbec&utm_content=none&utm_term=none&gclid=12&fbclid=13
 ```
 
-**Parameter Categories:**
+**Parameter-Kategorien:**
 
-**1. Prospect Identification:**
+**1. Prospect-Identifikation:**
 ```typescript
-prospect: "68a36940d7f5370a25055570"  // Unique prospect identifier
+prospect: "68a36940d7f5370a25055570"  // Eindeutige Prospect-ID
 ```
-- Links email recipient to landing page visit
-- Enables conversion tracking and attribution
-- Allows personalization based on prospect data
-- Powers A/B testing and segmentation analysis
+- Verknüpft E-Mail-Empfänger mit Landingpage-Besuch
+- Ermöglicht Conversion-Tracking und Attribution
+- Erlaubt Personalisierung basierend auf Prospect-Daten
+- Unterstützt A/B-Testing und Segment-Analysen
 
-**2. UTM Campaign Tracking:**
+**2. UTM-Kampagnen-Tracking:**
 ```typescript
-utm_source: "mail"                      // Traffic source (mail, social, web, etc.)
-utm_medium: "web"                       // Marketing medium (email, banner, link)  
-utm_campaign: "686a3affca7748f6b807cbec" // Campaign identifier
-utm_content: "none"                     // Ad content or email variant identifier
-utm_term: "none"                        // Keyword terms (for paid search)
+utm_source: "mail"                      // Traffic-Quelle (mail, social, web, etc.)
+utm_medium: "web"                       // Marketing-Medium (email, banner, link)  
+utm_campaign: "686a3affca7748f6b807cbec" // Kampagnen-Identifier
+utm_content: "none"                     // Anzeigeninhalt oder E-Mail-Variante
+utm_term: "none"                        // Keyword-Begriffe (für Paid Search)
 ```
-- Standard Google Analytics UTM parameters
-- Enables campaign performance analysis
-- Tracks conversion funnel effectiveness
-- Measures ROI across different channels
+- Standard-Google-Analytics-Parameter
+- Ermöglicht Kampagnen-Performance-Analyse
+- Misst Effektivität im Conversion-Funnel
+- Erfasst ROI über verschiedene Kanäle
 
-**3. Platform-Specific Tracking:**
+**3. Plattform-spezifisches Tracking:**
 ```typescript
-gclid: "12"                            // Google Ads click identifier  
-fbclid: "13"                           // Facebook Ads click identifier
+gclid: "12"                            // Google Ads Klick-ID  
+fbclid: "13"                           // Facebook Ads Klick-ID
 ```
-- Links clicks to specific ad platform campaigns
-- Enables cross-platform conversion attribution
-- Supports advanced audience building
-- Powers retargeting and lookalike audiences
+- Verknüpft Klicks mit spezifischen Werbekampagnen
+- Ermöglicht plattformübergreifende Conversion-Attribution
+- Unterstützt Zielgruppenbildung
+- Erlaubt Retargeting und Lookalike Audiences
 
-**Backend Processing:**
+**Backend-Verarbeitung:**
 
-When the frontend makes the API request, all parameters are forwarded to the backend where they can be:
+Wenn das Frontend die API anfragt, werden alle Parameter ans Backend übermittelt, wo sie:
 
-1. **Logged for Analytics**: Track visitor sources, campaigns, and conversion paths
-2. **Stored with Conversions**: Associate form submissions or actions with tracking data  
-3. **Used for Personalization**: Customize content based on prospect information
-4. **Fed to Attribution Models**: Calculate campaign ROI and effectiveness
-5. **Integrated with CRM**: Update prospect records with engagement data
+1. **Für Analysen gespeichert** werden: Herkunft, Kampagnen und Conversion-Pfade nachverfolgen  
+2. **Mit Conversions gespeichert** werden: Formulareinsendungen oder Aktionen mit Tracking-Daten verknüpfen  
+3. **Für Personalisierung genutzt** werden: Inhalte anhand Prospect-Daten anpassen  
+4. **In Attributionsmodelle eingespeist** werden: ROI und Effektivität berechnen  
+5. **Mit dem CRM synchronisiert** werden: Prospect-Datensätze mit Engagement-Daten anreichern  
 
-**Email Campaign Integration:**
+**E-Mail-Kampagnen-Integration:**
 
-Typical email-to-landing page workflow:
+Typischer Workflow von E-Mail zu Landingpage:
 
-1. **Campaign Creation**: Admin creates campaign with landing page
-2. **Email Generation**: Email system generates personalized URLs for each prospect
-3. **Parameter Injection**: System adds prospect ID and UTM parameters to CTA links
-4. **Click Tracking**: Email platform tracks initial click (optional)
-5. **Landing Page Visit**: Frontend forwards all parameters to backend API
-6. **Analytics Recording**: Backend logs visit data with full attribution context
-7. **Conversion Tracking**: Any actions (form fills, downloads) are linked to original email
-
-**Advanced Use Cases:**
-
-**Multi-Touch Attribution:**
-```typescript
-// Track entire prospect journey across multiple touchpoints
-const trackingData = {
-  prospect: "68a36940d7f5370a25055570",
-  utm_source: "mail",
-  utm_campaign: "686a3affca7748f6b807cbec", 
-  previous_visits: 3,                    // From backend prospect data
-  last_email_opened: "2024-01-15",       // Cross-reference with email logs
-  conversion_likelihood: 0.73            // ML-predicted conversion score
-}
-```
-
-**Dynamic Content Personalization:**
-```typescript
-// Backend can return personalized content based on prospect data
-if (prospectId) {
-  const prospect = await getProspectData(prospectId)
-  return personalizedLandingpage({
-    ...baseLandingpage,
-    headline: `Welcome back, ${prospect.firstName}!`,
-    sections: getPersonalizedSections(prospect.interests)
-  })
-}
-```
-
-**A/B Testing with Attribution:**
-```typescript
-// Test different landing page variants while maintaining tracking
-const variant = getABTestVariant(campaignId, prospectId)
-const landingpageContent = applyVariant(baseLandingpage, variant)
-
-// All parameters preserved for proper test attribution
-trackABTestExposure(prospectId, campaignId, variant, utmParams)
-```
-
-**Parameter Validation and Security:**
-
-The system should validate incoming parameters to ensure data integrity:
-
-```typescript
-// Example parameter validation (backend implementation)
-interface TrackingParams {
-  prospect?: string      // UUID format validation
-  utm_source?: string    // Allowed values: mail, social, web, direct
-  utm_medium?: string    // Allowed values: email, banner, link, organic
-  utm_campaign?: string  // UUID format validation
-  utm_content?: string   // String, optional
-  utm_term?: string      // String, optional  
-  gclid?: string        // Alphanumeric, optional
-  fbclid?: string       // Alphanumeric, optional
-}
-```
-
-**Privacy and Compliance:**
-
-- **Data Retention**: Define retention periods for tracking data
-- **GDPR Compliance**: Ensure proper consent for tracking prospect behavior
-- **Anonymization**: Option to anonymize prospect IDs after conversion
-- **Opt-out Support**: Respect unsubscribe and do-not-track preferences
-
-## Admin Interface Integration
-
-### Section Management
-
-**SectionsRepeater Component Features:**
-- Drag-and-drop reordering (UI prepared with GripVertical icon)
-- Add/remove sections dynamically
-- Markdown editor for rich text content
-- Real-time form validation
-- Individual field error handling
-
-**Form Validation:**
-```typescript
-// Section-level validation
-getFieldError(sectionIndex, field) // e.g., "sections.0.text"
-
-// Error display per field
-{getFieldError(index, 'text') && (
-  <p className="text-sm text-red-600">{getFieldError(index, 'text')}</p>
-)}
-```
-
-### Content Editor Features
-
-**Markdown Support:**
-- Full markdown editor with preview
-- Light theme integration
-- Toolbar for formatting options
-- Real-time preview capabilities
-
-**Media Management:**
-- URL-based image references
-- Validation for proper URLs
-- Preview capabilities (could be enhanced)
-
-## Best Practices
-
-### Content Strategy
-
-**Section Planning:**
-1. **Hero Section**: Start with compelling headline and key value proposition
-2. **Feature Sections**: Alternate text and images for visual interest  
-3. **Image Sections**: Use for visual breaks or showcasing without text
-4. **CTA Placement**: Strategic placement throughout the journey
-
-**Content Guidelines:**
-```typescript
-// Recommended section structure
-sections: [
-  { /* Hero: Main value prop */ },
-  { /* Feature 1: Key benefit with image */ }, 
-  { /* Feature 2: Secondary benefit */ },
-  { /* Image showcase: Visual proof */ },
-  { /* Feature 3: Final selling point */ }
-]
-```
-
-### Image Best Practices
-
-**Sizing Recommendations:**
-- Hero images: 1200x600px or larger
-- Feature images: 800x400px minimum  
-- Showcase images: 1200x800px for impact
-
-**Format Guidelines:**
-- WebP preferred for modern browsers
-- JPEG fallback for compatibility
-- PNG for images with transparency
-- Proper compression for web delivery
-
-### Mobile Optimization
-
-**Content Considerations:**
-- Keep headlines concise for mobile screens
-- Use shorter paragraphs for better mobile reading
-- Ensure CTA text is clear and actionable
-- Test image visibility on small screens
-
-**Performance:**
-- Optimize images for mobile bandwidth
-- Consider lazy loading for long pages
-- Test touch interactions on actual devices
-
-## Advanced Features
-
-### Dynamic Content Injection
-
-**URL Parameter Integration:**
-```typescript
-// Query parameters can be used for personalization
-// Example: /campaign/summer-sale?name=John&region=NYC
-// API can return personalized content based on parameters
-```
-
-### A/B Testing Ready
-
-**Variation Support:**
-- Different sections can be served based on parameters
-- Multiple CTA versions for testing
-- Image variant testing capabilities
-
-### Analytics Integration
-
-**Tracking Ready Structure:**
-```typescript
-// CTA buttons include campaign context for tracking
-aria-label={`${section.cta_text} - ${data.title}`}
-
-// External links properly configured
-target="_blank" rel="noopener noreferrer"
-```
-
-## File Structure
-
-```
-app/
-   routes/
-      landingpage.tsx              # Public landing page route
-      admin/
-          landingpage-form.tsx     # Admin form for editing
-   components/
-      ui/
-          sections-repeater.tsx    # Admin sections editor
-   lib/
-      types.ts                     # TypeScript interfaces
-   docs/
-       src/
-           landingpage.md          # This documentation
-```
-
-## Future Enhancements
-
-### Content Management
-- **Visual Section Editor**: Drag-and-drop section builder
-- **Image Upload**: Built-in image management vs URLs
-- **Template Library**: Pre-built section templates
-- **Content Blocks**: Reusable content components
-
-### Performance
-- **Image Optimization**: Automatic resizing and format conversion
-- **Lazy Loading**: Progressive image loading
-- **CDN Integration**: Optimized asset delivery
-- **Caching Strategy**: Static generation for popular campaigns
-
-### Functionality
-- **Form Integration**: Lead capture forms within sections
-- **Video Support**: Embedded video content in sections
-- **Animation Library**: Rich scroll-triggered animations  
-- **Personalization**: Dynamic content based on user data
-
-### Analytics
-- **Conversion Tracking**: Section-level engagement metrics
-- **Heat Mapping**: User interaction visualization
-- **A/B Testing**: Built-in split testing framework
-- **Performance Monitoring**: Core Web Vitals tracking
+1. **Kampagne erstellen**: Admin erstellt Kampagne mit Landingpage  
+2. **E-Mail generieren**: E-Mail-System erzeugt personalisierte URLs für jeden Prospect  
+3. **Parameter-Injektion**: Prospect-ID und UTM-Parameter werden an CTA-Links angehängt  
+4. **Klick-Tracking**: Optional kann die E-Mail-Plattform den ersten Klick erfassen  
+5. **Landingpage-Besuch**: Frontend leitet Parameter an Backend-API weiter  
+6. **Analyseaufzeichnung**: Backend speichert Besuchsdaten mit voller Attribution  
+7. **Conversion-Tracking**: Aktionen (Formulare, Downloads) werden verknüpft  

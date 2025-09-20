@@ -1,100 +1,579 @@
-# API Wrapper Documentation
+# API Wrapper Dokumentation
 
-The API wrapper (`app/lib/api.ts`) provides a centralized way to handle HTTP requests to your backend API with consistent configuration and error handling.
+Der API Wrapper (`app/lib/api.ts`) bietet eine zentrale Methode zur Behandlung von HTTP-Anfragen an Ihre Backend-API mit konsistenter Konfiguration und Fehlerbehandlung.
 
-## Configuration
+## Überblick
 
-The wrapper automatically configures:
-- Base URL from `VITE_API_URL` environment variable (defaults to `http://localhost:8000`)
-- Credentials include for cookie-based authentication
-- JSON headers (`Accept` and `Content-Type`)
-- CSRF token handling for Laravel Sanctum
+Der API-Wrapper abstrahiert die native `fetch`-API und bietet:
+- **Automatische URL-Konfiguration**: Basis-URL aus Umgebungsvariablen
+- **Konsistente Header**: JSON-Content-Type und Accept-Header
+- **CSRF-Schutz**: Automatische XSRF-Token-Behandlung
+- **Authentifizierung**: Automatische Weiterleitung bei 401-Fehlern
+- **Query-Parameter**: Erweiterte Unterstützung für Arrays und primitive Typen
+- **Paginierung**: Intelligente Auto-Fetch-Funktionalität für alle Seiten
+- **TypeScript**: Vollständige Typsicherheit mit Generics
 
-## Basic Usage
+## Konfiguration
 
-### Import
+### Umgebungsvariablen
 
 ```typescript
-import { api, apiHelpers } from "~/lib/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 ```
 
-### Core Functions
+Der Wrapper konfiguriert automatisch:
+- **Basis-URL**: Aus `VITE_API_URL` Umgebungsvariable (Standard: `http://localhost:8000`)
+- **Credentials**: `"include"` für Cookie-basierte Authentifizierung
+- **JSON-Header**: Automatisch gesetzt für `Accept` und `Content-Type`
+- **CSRF-Token-Behandlung**: Für Laravel Sanctum optimiert
 
-#### `api(endpoint, options)`
-
-Low-level fetch wrapper that returns a `Response` object.
+### Standard-Header
 
 ```typescript
-const response = await api("/api/users", {
-  method: "GET",
-  requiresAuth: true
-});
+const headers: HeadersInit = {
+  "Accept": "application/json",
+  "Content-Type": "application/json",
+  ...fetchOptions.headers,
+};
 ```
 
+## Kern-Interfaces und Typen
 
-### Helper Methods
-
-#### GET Requests
+### ApiOptions Interface
 
 ```typescript
-// Simple GET
+interface ApiOptions extends RequestInit {
+  requiresAuth?: boolean;     // Auto-Weiterleitung zu /admin/login bei 401
+  includeCSRF?: boolean;      // XSRF-Token-Header einbeziehen
+  params?: Record<string, string | number | boolean | string[]>; // Query-Parameter
+}
+```
+
+### PaginationOptions Interface
+
+```typescript
+interface PaginationOptions {
+  page?: number;      // Seitennummer (Standard: 1)
+  per_page?: number;  // Elemente pro Seite (Standard: 10)
+}
+```
+
+## Kern-Funktionen
+
+### `api(endpoint, options)` - Basis-Funktion
+
+Die grundlegende Funktion, die alle anderen Wrapper-Funktionen verwenden:
+
+```typescript
+export async function api(endpoint: string, options: ApiOptions = {}): Promise<Response>
+```
+
+**Parameter:**
+- `endpoint`: API-Endpunkt (relativ oder absolut)
+- `options`: Erweiterte RequestInit-Optionen mit zusätzlichen Eigenschaften
+
+**Funktionalität:**
+1. **URL-Aufbau**: Kombiniert Basis-URL mit Endpunkt
+2. **Query-Parameter-Verarbeitung**: Konvertiert Objects zu URLSearchParams
+3. **Array-Parameter-Unterstützung**: Spezielle Behandlung für Array-Werte
+4. **Header-Konfiguration**: Setzt Standard-JSON-Header
+5. **CSRF-Token-Integration**: Fügt X-XSRF-TOKEN hinzu wenn `includeCSRF: true`
+6. **Authentifizierung**: Automatische Weiterleitung bei 401 und `requiresAuth: true`
+
+#### URL und Query-Parameter-Verarbeitung
+
+```typescript
+// URL-Aufbau
+let url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+
+// Query-Parameter-Verarbeitung
+if (params) {
+  const urlParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      // Array-Werte: key=val1&key=val2
+      value.forEach(item => {
+        urlParams.append(key, String(item));
+      });
+    } else {
+      // Primitive Werte: key=value
+      urlParams.append(key, String(value));
+    }
+  });
+  url += `${url.includes('?') ? '&' : '?'}${urlParams.toString()}`;
+}
+```
+
+#### CSRF-Token-Behandlung
+
+```typescript
+if (includeCSRF) {
+  const xsrfToken = getXsrfTokenFromCookie();
+  if (xsrfToken) {
+    (headers as any)["X-XSRF-TOKEN"] = xsrfToken;
+  }
+}
+```
+
+#### Authentifizierungs-Weiterleitung
+
+```typescript
+if (requiresAuth && !response.ok && response.status === 401) {
+  window.location.href = "/admin/login";
+  throw new Error("Authentication required");
+}
+```
+
+### `apiJson<T>(endpoint, options)` - JSON-Response-Handler
+
+```typescript
+async function apiJson<T = any>(endpoint: string, options: ApiOptions = {}): Promise<T>
+```
+
+**Funktionalität:**
+1. Ruft `api()` auf
+2. Überprüft Response-Status
+3. Konvertiert Response zu JSON
+4. Wirft strukturierte Fehler bei Problemen
+
+**Fehlerbehandlung:**
+```typescript
+if (!response.ok) {
+  const errorText = await response.text();
+  throw new Error(`API Error: ${response.status} ${errorText}`);
+}
+```
+
+## API Helper-Methoden
+
+Der `apiHelpers`-Export bietet praktische Wrapper für häufige HTTP-Methoden:
+
+### GET-Anfragen
+
+```typescript
+get: <T = any>(endpoint: string, options?: Omit<ApiOptions, 'method'>) =>
+  apiJson<T>(endpoint, { ...options, method: 'GET' })
+```
+
+**Verwendungsbeispiele:**
+
+```typescript
+// Einfache GET-Anfrage
 const user = await apiHelpers.get<User>("/api/user");
 
-// GET with authentication required
+// GET mit Authentifizierung
 const protectedData = await apiHelpers.get("/api/protected", {
   requiresAuth: true
 });
 
-// GET with query parameters
+// GET mit einfachen Query-Parametern
 const filtered = await apiHelpers.get("/api/users", {
-  params: { status: "active", role: "admin" }
+  params: {
+    status: "active",
+    role: "admin",
+    page: 1,
+    limit: 50
+  }
 });
 
-// GET with array parameters (for filtering)
+// GET mit Array-Parametern für Multi-Select-Filter
 const campaigns = await apiHelpers.get("/api/campaigns", {
-  params: { status: ["active", "draft"], categories: ["email", "social"] }
+  params: {
+    status: ["active", "draft", "completed"],
+    categories: ["email", "social", "content"],
+    tags: ["urgent", "newsletter"]
+  }
 });
+// Erzeugt: ?status=active&status=draft&status=completed&categories=email&categories=social&categories=content&tags=urgent&tags=newsletter
 ```
 
-#### POST Requests
+### POST-Anfragen
 
 ```typescript
-// POST with data
+post: <T = any>(endpoint: string, data?: any, options?: Omit<ApiOptions, 'method' | 'body'>) =>
+  apiJson<T>(endpoint, {
+    ...options,
+    method: 'POST',
+    body: data ? JSON.stringify(data) : undefined,
+  })
+```
+
+**Verwendungsbeispiele:**
+
+```typescript
+// POST mit JSON-Daten
 const newUser = await apiHelpers.post<User>("/api/users", {
   name: "John Doe",
-  email: "john@example.com"
+  email: "john@example.com",
+  role: "admin"
 });
 
-// POST with CSRF token (for authentication endpoints)
+// POST mit CSRF-Token (für Authentifizierungs-Endpunkte)
 await apiHelpers.post("/login", { email, password }, {
+  includeCSRF: true
+});
+
+// POST mit Authentifizierung und CSRF
+const campaign = await apiHelpers.post("/api/campaigns", {
+  title: "Neue Kampagne",
+  description: "Beschreibung",
+  status: "draft"
+}, {
+  requiresAuth: true,
   includeCSRF: true
 });
 ```
 
-#### PUT Requests
+### PUT-Anfragen
 
 ```typescript
+put: <T = any>(endpoint: string, data?: any, options?: Omit<ApiOptions, 'method' | 'body'>) =>
+  apiJson<T>(endpoint, {
+    ...options,
+    method: 'PUT',
+    body: data ? JSON.stringify(data) : undefined,
+  })
+```
+
+**Verwendungsbeispiele:**
+
+```typescript
+// PUT für vollständige Ressourcen-Updates
 const updatedUser = await apiHelpers.put<User>(`/api/users/${id}`, {
   name: "Jane Doe",
-  email: "jane@example.com"
+  email: "jane@example.com",
+  role: "editor"
 }, {
-  requiresAuth: true
+  requiresAuth: true,
+  includeCSRF: true
+});
+
+// PUT ohne Body für Aktions-Endpunkte
+await apiHelpers.put(`/api/campaigns/${id}/activate`, undefined, {
+  requiresAuth: true,
+  includeCSRF: true
 });
 ```
 
-#### DELETE Requests
+### DELETE-Anfragen
 
 ```typescript
+delete: <T = any>(endpoint: string, options?: Omit<ApiOptions, 'method'>) =>
+  apiJson<T>(endpoint, { ...options, method: 'DELETE' })
+```
+
+**Verwendungsbeispiele:**
+
+```typescript
+// Einfaches DELETE
 await apiHelpers.delete(`/api/users/${id}`, {
-  requiresAuth: true
+  requiresAuth: true,
+  includeCSRF: true
+});
+
+// DELETE mit Response-Daten
+const deleteResult = await apiHelpers.delete<{deleted: boolean, message: string}>(`/api/campaigns/${id}`, {
+  requiresAuth: true,
+  includeCSRF: true
 });
 ```
 
-#### Paginated Requests (Auto-Fetch All)
+## Paginierte Anfragen - Detaillierte Implementierung
 
-The `paginated` method automatically fetches all pages when the total count exceeds the per_page limit, combining all results into a single response.
+### `paginated<T>(endpoint, pagination, options)` - Auto-Fetch-Alle-Seiten
 
 ```typescript
+paginated: async <T = any>(
+  endpoint: string,
+  pagination: PaginationOptions = {},
+  options?: Omit<ApiOptions, 'method'>
+): Promise<T>
+```
+
+**Algorithmus-Überblick:**
+
+1. **Erste Anfrage**: Holt Seite 1 mit angegebener `per_page`
+2. **Meta-Daten-Analyse**: Überprüft `total`, `last_page`, `per_page` in Response
+3. **Mehrseiten-Erkennung**: Wenn `total > per_page` und `last_page > 1`
+4. **Parallele Anfragen**: Erstellt Promises für Seiten 2 bis `last_page`
+5. **Promise.all()**: Führt alle verbleibenden Anfragen parallel aus
+6. **Daten-Kombination**: Vereint alle `data`-Arrays zu einem
+7. **Meta-Update**: Aktualisiert `current_page: 1` und `per_page: allData.length`
+
+### Schritt-für-Schritt-Implementierung
+
+#### 1. Erste Anfrage und Parameter-Verarbeitung
+
+```typescript
+const { page = 1, per_page = 10 } = pagination;
+
+// Erste Anfrage mit kombinierten Parametern
+const firstResponse = await apiJson<T>(endpoint, {
+  ...options,
+  method: 'GET',
+  params: {
+    page,
+    per_page,
+    ...options?.params  // Erhält zusätzliche Filter-Parameter
+  }
+});
+```
+
+#### 2. Paginierungs-Erkennung
+
+```typescript
+// Überprüfung auf Laravel-Standard-Paginierung
+if (
+  firstResponse &&
+  typeof firstResponse === 'object' &&
+  'meta' in firstResponse &&
+  'data' in firstResponse
+) {
+  const paginatedResponse = firstResponse as any;
+  const { total, per_page: actualPerPage, last_page } = paginatedResponse.meta;
+
+  // Mehrseiten-Logik nur wenn nötig
+  if (total > actualPerPage && last_page > 1) {
+    // Auto-Fetch-Logik
+  }
+}
+```
+
+#### 3. Parallele Seiten-Anfragen
+
+```typescript
+const allData = [...paginatedResponse.data];
+const promises = [];
+
+// Erstelle Promises für alle verbleibenden Seiten
+for (let currentPage = 2; currentPage <= last_page; currentPage++) {
+  promises.push(
+    apiJson<T>(endpoint, {
+      ...options,
+      method: 'GET',
+      params: {
+        page: currentPage,
+        per_page: actualPerPage,  // Verwendet tatsächliche per_page aus Response
+        ...options?.params        // Erhält Filter von ursprünglicher Anfrage
+      }
+    })
+  );
+}
+```
+
+#### 4. Parallele Ausführung und Daten-Kombination
+
+```typescript
+// Alle Anfragen parallel ausführen
+const remainingResponses = await Promise.all(promises);
+
+// Alle Daten-Arrays kombinieren
+remainingResponses.forEach(response => {
+  if (response && typeof response === 'object' && 'data' in response) {
+    allData.push(...(response as any).data);
+  }
+});
+```
+
+#### 5. Response-Aufbau mit aktualisierten Meta-Daten
+
+```typescript
+return {
+  ...paginatedResponse,
+  data: allData,
+  meta: {
+    ...paginatedResponse.meta,
+    current_page: 1,                // Zurückgesetzt auf 1
+    per_page: allData.length        // Tatsächliche Anzahl aller Elemente
+  }
+} as T;
+```
+
+### Paginierungs-Szenarien
+
+#### Szenario 1: Einzelne Seite
+```typescript
+// API Response: { data: [1,2,3], meta: { total: 3, per_page: 10, last_page: 1 } }
+const result = await apiHelpers.paginated('/api/items', { per_page: 10 });
+// Ergebnis: Ursprüngliche Response (1 Anfrage)
+```
+
+#### Szenario 2: Mehrere Seiten
+```typescript
+// API Response: { data: [1,2], meta: { total: 7, per_page: 2, last_page: 4 } }
+const result = await apiHelpers.paginated('/api/items', { per_page: 2 });
+// Ergebnis: { data: [1,2,3,4,5,6,7], meta: { total: 7, per_page: 7, current_page: 1, last_page: 4 } }
+// Anfragen: 4 parallele Requests (Seiten 1,2,3,4)
+```
+
+#### Szenario 3: Mit Filter-Parametern
+```typescript
+const result = await apiHelpers.paginated('/api/campaigns',
+  { per_page: 50 },
+  {
+    requiresAuth: true,
+    params: {
+      status: ["active", "draft"],
+      category: "email"
+    }
+  }
+);
+// Alle Seiten-Anfragen erhalten dieselben Filter-Parameter
+```
+
+## Query-Parameter-Verarbeitung im Detail
+
+### Primitive Typen
+
+```typescript
+// Input
+params: {
+  name: "John",
+  age: 25,
+  active: true
+}
+
+// Output: ?name=John&age=25&active=true
+```
+
+### Array-Parameter
+
+```typescript
+// Input
+params: {
+  roles: ["admin", "editor"],
+  tags: ["urgent", "newsletter", "campaign"]
+}
+
+// Output: ?roles=admin&roles=editor&tags=urgent&tags=newsletter&tags=campaign
+```
+
+**Backend-Kompatibilität:**
+- **Laravel**: Automatisch als Array interpretiert
+- **Express.js**: Verwendet `req.query.roles` als Array
+- **Django**: `request.GET.getlist('roles')`
+
+### Gemischte Parameter
+
+```typescript
+// Input
+params: {
+  search: "user search",
+  page: 1,
+  status: ["active", "pending"],
+  sort: "created_at",
+  order: "desc"
+}
+
+// Output: ?search=user+search&page=1&status=active&status=pending&sort=created_at&order=desc
+```
+
+## Erweiterte Konfiguration
+
+### Custom Headers
+
+```typescript
+await apiHelpers.get('/api/data', {
+  headers: {
+    'Custom-Header': 'value',
+    'Authorization': 'Bearer token'  // Überschreibt Standard-Auth
+  }
+});
+```
+
+### Absolute URLs
+
+```typescript
+// Ignoriert API_BASE_URL
+await apiHelpers.get('https://external-api.com/endpoint');
+```
+
+### Request Timeout
+
+```typescript
+await apiHelpers.get('/api/data', {
+  signal: AbortSignal.timeout(5000)  // 5 Sekunden Timeout
+});
+```
+
+## Fehlerbehandlung im Detail
+
+### HTTP-Status-Fehler
+
+```typescript
+// Bei nicht-erfolgreichen Responses
+try {
+  await apiHelpers.get('/api/nonexistent');
+} catch (error) {
+  // error.message: "API Error: 404 Not Found"
+  console.log(error.message);
+}
+```
+
+### Authentifizierungs-Fehler
+
+```typescript
+try {
+  await apiHelpers.get('/api/protected', { requiresAuth: true });
+} catch (error) {
+  // Bei 401: Automatische Weiterleitung zu /admin/login
+  // error.message: "Authentication required"
+}
+```
+
+### Netzwerk-Fehler
+
+```typescript
+try {
+  await apiHelpers.get('/api/data');
+} catch (error) {
+  if (error instanceof TypeError) {
+    // Netzwerk-Connectivity-Probleme
+    console.log('Netzwerkfehler:', error.message);
+  }
+}
+```
+
+### CSRF-Fehler
+
+```typescript
+try {
+  await apiHelpers.post('/api/data', {}, { includeCSRF: true });
+} catch (error) {
+  // error.message: "API Error: 419 CSRF token mismatch"
+  console.log('CSRF-Fehler:', error.message);
+}
+```
+
+## Performance-Optimierungen
+
+### 1. Parallele Paginierung
+
+```typescript
+// Automatisch parallel für große Datensätze
+const campaigns = await apiHelpers.paginated('/api/campaigns', { per_page: 100 });
+// Bei 1000 Elementen: 10 parallele Anfragen statt 10 sequenzielle
+```
+
+### 2. Parameter-Wiederverwendung
+
+```typescript
+// Filter werden an alle Seiten-Anfragen weitergegeben
+const filtered = await apiHelpers.paginated('/api/data',
+  { per_page: 50 },
+  {
+    params: {
+      complex_filter: "value",
+      date_range: ["2024-01-01", "2024-12-31"]
+    }
+  }
+);
+```
+
+### 3. TypeScript-Optimierung
+
+```typescript
+// Vollständige Typisierung für bessere IDE-Unterstützung
 interface CampaignResponse {
   data: Campaign[];
   meta: {
@@ -105,487 +584,138 @@ interface CampaignResponse {
   };
 }
 
-// This will automatically fetch ALL campaigns across all pages
-const campaigns = await apiHelpers.paginated<CampaignResponse>(
-  "/api/campaigns",
-  { page: 1, per_page: 50 }, // Will fetch all pages if total > 50
-  { requiresAuth: true }
-);
-
-// Example: If API has 250 campaigns with per_page=50
-// - Makes 5 parallel requests (pages 1-5)
-// - Returns single response with all 250 campaigns in data array
+const campaigns = await apiHelpers.paginated<CampaignResponse>('/api/campaigns');
+// campaigns.data ist vollständig typisiert als Campaign[]
 ```
 
-**Auto-Fetch Behavior:**
-- **Single Page**: If `total ≤ per_page`, returns original response (1 request)
-- **Multiple Pages**: If `total > per_page`, fetches all pages in parallel and combines data
-- **Performance**: Uses `Promise.all()` for maximum speed
-- **Metadata**: Updates `per_page` to reflect actual combined count
+## Cache-Integration
 
-## Options
+Der API-Wrapper integriert sich nahtlos mit dem Cache-Manager:
 
-### `ApiOptions`
-
-```typescript
-interface ApiOptions extends RequestInit {
-  requiresAuth?: boolean;     // Auto-redirect to /admin/login on 401
-  includeCSRF?: boolean;      // Include XSRF token header
-  params?: Record<string, string | number | boolean | string[]>; // Query parameters (includes array support)
-}
-```
-
-### `PaginationOptions`
-
-```typescript
-interface PaginationOptions {
-  page?: number;      // Page number (default: 1)
-  per_page?: number;  // Items per page (default: 10)
-}
-```
-
-## Error Handling
-
-The wrapper automatically:
-- Throws errors for non-2xx responses
-- Redirects to `/admin/login` when `requiresAuth: true` and response is 401
-- Uses `window.location.href` for redirects to ensure full page navigation
-- Includes response status and error text in error messages
-
-### Basic Error Handling
-
-```typescript
-try {
-  const data = await apiHelpers.get("/api/protected", { requiresAuth: true });
-} catch (error) {
-  // Will automatically redirect to /admin/login if 401
-  // Or throw descriptive error for other status codes
-  console.error("API Error:", error.message);
-}
-```
-
-### Form Validation Error Handling
-
-The `useFormWithValidation` hook automatically parses Laravel validation errors:
-
-```typescript
-const { getFieldError, submitForm } = useFormWithValidation({
-  initialData: { email: '', password: '' },
-  endpoint: '/api/users',
-  // ... other options
-});
-
-// In your component
-{getFieldError('email') && (
-  <span className="text-red-600">{getFieldError('email')}</span>
-)}
-
-// Errors are automatically parsed from API responses like:
-// {
-//   "message": "The given data was invalid.",
-//   "errors": {
-//     "email": ["The email field is required."],
-//     "password": ["The password must be at least 8 characters."]
-//   }
-// }
-```
-
-### Toast Notifications
-
-Both form submissions and delete operations automatically show toast notifications:
-
-```typescript
-// Success toasts
-toast.success('Campaign created successfully')
-toast.success('Campaign updated successfully') 
-toast.success('Campaign deleted successfully')
-
-// Error toasts
-toast.error('Failed to create campaign')
-toast.error('Failed to update campaign')
-toast.error('Failed to delete campaign')
-```
-
-## Caching Integration
-
-The API wrapper integrates with the cache manager (`~/lib/cache-manager`) for optimal performance.
-
-### Cache Tags
-
-```typescript
-import { CACHE_TAGS } from "~/lib/cache-manager";
-
-// Available cache tags
-CACHE_TAGS.CAMPAIGNS    // 'campaigns'
-CACHE_TAGS.PROSPECTS    // 'prospects'
-CACHE_TAGS.LANDINGPAGES // 'landingpages'
-CACHE_TAGS.USER         // 'user'
-```
-
-### Using withCache
+### Basis-Caching
 
 ```typescript
 import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
 
-// Cache API responses with TTL and automatic invalidation
 const campaigns = await withCache(
   () => apiHelpers.paginated('/api/campaigns', { page: 1, per_page: 50 }, { requiresAuth: true }),
   CACHE_TAGS.CAMPAIGNS,
-  { 
-    ttl: 2 * 60 * 1000,           // 2 minutes cache
-    tags: [CACHE_TAGS.CAMPAIGNS]  // Cache tags for invalidation
-  }
+  { ttl: 2 * 60 * 1000 }
 );
 ```
 
-### Automatic Cache Invalidation
+### Cache-Invalidierung bei Mutationen
 
-The cache automatically invalidates when data changes through various mutation operations:
-
-#### Delete Operations
 ```typescript
-// Delete operations automatically invalidate cache via useAdminActions
-const { handleDeleteConfirm } = useAdminActions({
-  endpoint: '/api/campaigns',
-  basePath: '/admin/campaign',
-  cacheKey: CACHE_TAGS.CAMPAIGNS, // Automatically invalidates on delete
-  entityName: 'Campaign'
+// Automatisch in useFormWithValidation und useAdminActions
+if (cacheKey) {
+  cacheManager.invalidate(cacheKey);
+}
+```
+
+## Best Practices
+
+### 1. TypeScript-Nutzung
+
+```typescript
+// ✅ Gut: Vollständige Typisierung
+interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const user = await apiHelpers.get<User>('/api/user');
+
+// ❌ Schlecht: Untypisiert
+const user = await apiHelpers.get('/api/user');
+```
+
+### 2. Fehlerbehandlung
+
+```typescript
+// ✅ Gut: Spezifische Fehlerbehandlung
+try {
+  const data = await apiHelpers.get('/api/data', { requiresAuth: true });
+  return data;
+} catch (error) {
+  if (error.message.includes('API Error: 401')) {
+    // Wird automatisch behandelt, aber für spezielle Logik
+  }
+  throw error; // Re-throw für höhere Ebenen
+}
+```
+
+### 3. Parameter-Organisation
+
+```typescript
+// ✅ Gut: Strukturierte Parameter
+const searchParams = {
+  query: searchTerm,
+  filters: {
+    status: ["active", "draft"],
+    category: selectedCategory
+  },
+  pagination: {
+    page: 1,
+    per_page: 50
+  }
+};
+
+const results = await apiHelpers.get('/api/search', {
+  params: {
+    q: searchParams.query,
+    ...searchParams.filters,
+    ...searchParams.pagination
+  }
 });
 ```
 
-#### Form Submissions (Create/Update)
+### 4. Paginierung vs. Standard-GET
+
 ```typescript
-// Forms automatically invalidate cache on successful submission
-const { submitForm } = useFormWithValidation({
-  initialData: { /* form fields */ },
-  endpoint: '/api/campaigns',
-  redirectPath: '/admin/campaign',
-  cacheKey: CACHE_TAGS.CAMPAIGNS, // Automatically invalidates on create/update
-  onSuccess: () => navigate('/admin/campaign'),
-  entityName: 'Campaign'
+// ✅ Für große Datensätze: Paginierung verwenden
+const allCampaigns = await apiHelpers.paginated('/api/campaigns', { per_page: 100 });
+
+// ✅ Für kleine Datensätze: Standard-GET
+const settings = await apiHelpers.get('/api/settings');
+```
+
+## Debugging und Entwicklung
+
+### Netzwerk-Debugging
+
+```typescript
+// Response-Details loggen
+const response = await api('/api/data');
+console.log('Status:', response.status);
+console.log('Headers:', Object.fromEntries(response.headers.entries()));
+console.log('Body:', await response.clone().text());
+```
+
+### Parameter-Debugging
+
+```typescript
+// URL-Aufbau überprüfen
+const params = { status: ["active", "draft"], page: 1 };
+const urlParams = new URLSearchParams();
+Object.entries(params).forEach(([key, value]) => {
+  if (Array.isArray(value)) {
+    value.forEach(item => urlParams.append(key, String(item)));
+  } else {
+    urlParams.append(key, String(value));
+  }
 });
+console.log('Generated URL params:', urlParams.toString());
 ```
 
-#### Manual Cache Invalidation
-```typescript
-import { cacheManager, CACHE_TAGS } from "~/lib/cache-manager";
-
-// Invalidate specific cache tag
-cacheManager.invalidate(CACHE_TAGS.CAMPAIGNS);
-
-// Invalidate by pattern
-cacheManager.invalidate('/api/campaigns');
-
-// Clear all cache
-cacheManager.clear();
-```
-
-### Cache Benefits
-
-- **Performance**: Subsequent requests served from memory cache
-- **Consistency**: Same cached data across multiple routes  
-- **Automatic Invalidation**: Cache clears when data is created, updated, or deleted
-- **TTL Support**: Automatic refresh after expiration (default: 5 minutes, configurable to 2 minutes)
-- **Parallel Requests**: Auto-fetch all pagination combined with smart caching
-- **Real-time Updates**: Immediate UI updates after mutations via `useRevalidator()`
-- **Toast Notifications**: Built-in success/error feedback for user actions
-
-## Environment Variables
-
-Set your backend URL in `.env`:
-
-```env
-VITE_API_URL=https://your-api.com
-```
-
-## Examples
-
-### Fetching User Data in a Route Loader
+### Paginierungs-Debugging
 
 ```typescript
-import { apiHelpers } from "~/lib/api";
-import { redirect } from "react-router";
-
-export async function clientLoader() {
-  try {
-    const user = await apiHelpers.get("/api/user");
-    return { user };
-  } catch {
-    throw redirect("/admin/login");
-  }
-}
+const paginatedResult = await apiHelpers.paginated('/api/data', { per_page: 10 });
+console.log('Total requests made:', paginatedResult.meta.last_page);
+console.log('Total items fetched:', paginatedResult.data.length);
+console.log('Items per original page:', paginatedResult.meta.total / paginatedResult.meta.last_page);
 ```
 
-### Form Submission with CSRF
-
-```typescript
-import type { ClientActionFunctionArgs } from "react-router";
-
-export async function clientAction({ request }: ClientActionFunctionArgs) {
-  const formData = await request.formData();
-  const email = String(formData.get("email") || "");
-  const password = String(formData.get("password") || "");
-
-  try {
-    // Get CSRF cookie first
-    await api("/sanctum/csrf-cookie", { method: "GET" });
-    
-    // Login with CSRF token
-    await apiHelpers.post("/login", { email, password }, {
-      includeCSRF: true
-    });
-    
-    return redirect("/admin");
-  } catch (error: any) {
-    let message = "Login failed";
-    if (error instanceof Error && error.message.includes("API Error:")) {
-      try {
-        const errorMessage = error.message.split("API Error: ")[1];
-        const data = JSON.parse(errorMessage.split(" ").slice(1).join(" "));
-        if (data?.message) message = data.message;
-      } catch (parseError) {
-        console.debug('Failed to parse error message as JSON:', parseError);
-      }
-    }
-    return { error: message };
-  }
-}
-```
-
-### Modern Route-Based Data Fetching
-
-**✅ Recommended: Use React Router loaders with caching**
-
-```typescript
-import { useLoaderData } from "react-router";
-import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
-
-// Route loader - runs before component renders
-export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
-  return withCache(
-    () => apiHelpers.paginated<PaginatedResponse<Campaign>>(
-      '/api/campaigns',
-      { page: 1, per_page: 50 }, // Auto-fetches all pages
-      { requiresAuth: true }
-    ),
-    CACHE_TAGS.CAMPAIGNS,
-    { ttl: 2 * 60 * 1000 } // 2 minutes cache
-  );
-}
-
-// Component - data is ready immediately
-export default function CampaignsPage() {
-  const campaigns = useLoaderData<typeof clientLoader>();
-  
-  // No loading states needed - data loads before route renders
-  return (
-    <div>
-      {campaigns.data.map(campaign => (
-        <div key={campaign.id}>{campaign.title}</div>
-      ))}
-    </div>
-  );
-}
-```
-
-### Legacy Component Data Fetching (Not Recommended)
-
-```typescript
-const [data, setData] = useState(null);
-const [loading, setLoading] = useState(true);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // This will fetch ALL items across all pages automatically
-      const result = await apiHelpers.paginated("/api/items", 
-        { page: 1, per_page: 50 },
-        { requiresAuth: true }
-      );
-      setData(result);
-    } catch (error) {
-      console.error("Failed to fetch data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, []); // Remove currentPage dependency - we fetch all data
-```
-
-## Modern CRUD Patterns
-
-### Complete CRUD Implementation with Caching
-
-Here's how to implement a complete CRUD interface with automatic caching and cache invalidation:
-
-#### 1. List Route (Read)
-
-```typescript
-// app/routes/admin/campaign.tsx
-import { useLoaderData } from "react-router";
-import type { Route } from "./+types/campaign";
-import type { Campaign, PaginatedResponse } from "~/lib/types";
-import { campaignColumns } from "~/components/columns/campaign-columns";
-import { AdminListLayout } from "~/components/ui/admin-list-layout";
-import { useAdminActions } from "~/hooks/useAdminActions";
-import { apiHelpers } from "~/lib/api";
-import { withCache, CACHE_TAGS } from "~/lib/cache-manager";
-
-export async function clientLoader(): Promise<PaginatedResponse<Campaign>> {
-  return withCache(
-    () => apiHelpers.paginated<PaginatedResponse<Campaign>>(
-      '/api/campaigns',
-      { page: 1, per_page: 50 },
-      { requiresAuth: true }
-    ),
-    CACHE_TAGS.CAMPAIGNS,
-    { ttl: 2 * 60 * 1000, tags: [CACHE_TAGS.CAMPAIGNS] } // 2 minutes TTL
-  );
-}
-
-export default function Campaign() {
-  const campaigns = useLoaderData<typeof clientLoader>();
-  
-  const {
-    deleteOpen,
-    setDeleteOpen,
-    itemToDelete,
-    isDeleting,
-    handleEdit,
-    handleDelete,
-    handleCreate,
-    handleDeleteConfirm
-  } = useAdminActions({
-    endpoint: '/api/campaigns',
-    basePath: '/admin/campaign',
-    cacheKey: CACHE_TAGS.CAMPAIGNS,
-    entityName: 'Campaign'
-  });
-
-  // Create columns with proper handler injection
-  const columns = campaignColumns(handleEdit, handleDelete);
-
-  return (
-    <AdminListLayout
-      title="Campaigns"
-      createButtonText="Create Campaign"
-      entityType="Campaign"
-      endpoint="/api/campaigns"
-      data={campaigns}
-      columns={columns}
-      deleteOpen={deleteOpen}
-      setDeleteOpen={setDeleteOpen}
-      itemToDelete={itemToDelete}
-      isDeleting={isDeleting}
-      onCreate={handleCreate}
-      onDeleteConfirm={handleDeleteConfirm}
-    />
-  );
-}
-```
-
-#### 2. Form Route (Create/Update)
-
-```typescript
-// app/routes/admin/campaign-form.tsx
-import { useState } from "react"
-import { useNavigate, useParams } from "react-router"
-import { useFormWithValidation } from "~/hooks/useFormWithValidation"
-import { CACHE_TAGS } from "~/lib/cache-manager"
-import type { ProspectFilter } from "~/lib/types"
-
-type Campaign = {
-  id?: string
-  title: string
-  description: string
-  start_date: string
-  end_date: string
-  status: 'draft' | 'active' | 'paused' | 'completed'
-  slug: string
-  landingpage_id: string | null
-  prospect_filter?: ProspectFilter
-}
-
-export default function CampaignForm() {
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const isEditing = !!id
-
-  const {
-    formData,
-    updateFormData,
-    loading,
-    getFieldError,
-    submitForm
-  } = useFormWithValidation<Campaign>({
-    initialData: {
-      title: '',
-      description: '',
-      start_date: '',
-      end_date: '',
-      status: 'draft',
-      slug: '',
-      landingpage_id: null
-    },
-    endpoint: '/api/campaigns',
-    redirectPath: '/admin/campaign',
-    cacheKey: CACHE_TAGS.CAMPAIGNS,
-    onSuccess: () => navigate('/admin/campaign'),
-    entityName: 'Campaign'
-  })
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    await submitForm(formData, { isEditing, id })
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Form fields with error handling */}
-      <input 
-        value={formData.title} 
-        onChange={(e) => updateFormData({ title: e.target.value })}
-      />
-      {getFieldError('title') && (
-        <span className="error">{getFieldError('title')}</span>
-      )}
-      
-      <button type="submit" disabled={loading}>
-        {loading ? 'Saving...' : (isEditing ? 'Update Campaign' : 'Create Campaign')}
-      </button>
-    </form>
-  )
-}
-```
-
-### Cache Invalidation Flow
-
-```mermaid
-graph TD
-    A[User Action] --> B{Action Type}
-    B -->|Create/Update| C[Form Submission]
-    B -->|Delete| D[Delete Confirmation]
-    C --> E[API Request]
-    D --> F[Delete API Request]
-    E --> G[Success?]
-    F --> H[Success?]
-    G -->|Yes| I[Invalidate Cache]
-    H -->|Yes| J[Invalidate Cache]
-    I --> K[Revalidate Routes]
-    J --> L[Revalidate Routes]
-    K --> M[UI Updates]
-    L --> M[UI Updates]
-```
-
-### Key Features
-
-✅ **Auto-Fetch All Pages**: Automatically combines paginated results  
-✅ **Smart Caching**: 2-minute TTL with automatic invalidation  
-✅ **Real-time Updates**: Cache invalidation triggers immediate UI updates via `revalidator.revalidate()`  
-✅ **Optimistic UX**: Loading states and error handling built-in  
-✅ **Type Safety**: Full TypeScript support throughout  
-✅ **Toast Notifications**: Built-in success/error feedback using Sonner  
-✅ **Form Validation**: Automatic Laravel validation error parsing and display  
-✅ **Array Query Params**: Support for filtering with multiple values
+Dieser umfassende API-Wrapper bietet eine robuste, typsichere und performante Grundlage für alle HTTP-Kommunikation in der Anwendung und abstrahiert komplexe Aspekte wie Paginierung, Authentifizierung und Fehlerbehandlung.
